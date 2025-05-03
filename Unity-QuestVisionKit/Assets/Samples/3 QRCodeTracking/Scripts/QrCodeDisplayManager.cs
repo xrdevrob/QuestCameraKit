@@ -1,29 +1,38 @@
-using System;
 using System.Collections.Generic;
+using PassthroughCameraSamples;
 using UnityEngine;
 using Meta.XR;
-using PassthroughCameraSamples;
+using System;
 
 public class QrCodeDisplayManager : MonoBehaviour
 {
 #if ZXING_ENABLED
     [SerializeField] private QrCodeScanner scanner;
     [SerializeField] private EnvironmentRaycastManager envRaycastManager;
-    [SerializeField] private WebCamTextureManager passthroughCameraManager;
 
     private readonly Dictionary<string, MarkerController> _activeMarkers = new();
+    private WebCamTextureManager _webCamTextureManager;
     private PassthroughCameraEye _passthroughCameraEye;
+
+    private enum QrRaycastMode
+    {
+        CenterOnly,
+        PerCorner
+    }
+    
+    [SerializeField] private QrRaycastMode raycastMode = QrRaycastMode.PerCorner;
 
     private void Awake()
     {
-        _passthroughCameraEye = passthroughCameraManager.Eye;
+        _webCamTextureManager = FindAnyObjectByType<WebCamTextureManager>();
+        _passthroughCameraEye = _webCamTextureManager.Eye;
     }
 
     private void Update()
     {
         UpdateMarkers();
     }
-
+    
     private async void UpdateMarkers()
     {
         var qrResults = await scanner.ScanFrameAsync() ?? Array.Empty<QrCodeResult>();
@@ -41,12 +50,9 @@ public class QrCodeDisplayManager : MonoBehaviour
             {
                 uvs[i] = new Vector2(qrResult.corners[i].x, qrResult.corners[i].y);
             }
-            
+
             var centerUV = Vector2.zero;
-            foreach (var uv in uvs)
-            {
-                centerUV += uv;
-            }
+            foreach (var uv in uvs) centerUV += uv;
             centerUV /= count;
 
             var intrinsics = PassthroughCameraUtils.GetCameraIntrinsics(_passthroughCameraEye);
@@ -54,64 +60,55 @@ public class QrCodeDisplayManager : MonoBehaviour
                 Mathf.RoundToInt(centerUV.x * intrinsics.Resolution.x),
                 Mathf.RoundToInt(centerUV.y * intrinsics.Resolution.y)
             );
-            
+
             var centerRay = PassthroughCameraUtils.ScreenPointToRayInWorld(_passthroughCameraEye, centerPixel);
-            if (!envRaycastManager || !envRaycastManager.Raycast(centerRay, out var hitInfo))
+            if (!envRaycastManager || !envRaycastManager.Raycast(centerRay, out var centerHitInfo))
             {
                 continue;
             }
 
-            var center = hitInfo.point;
-            var distance = Vector3.Distance(centerRay.origin, hitInfo.point);
-
-            var tempCorners = new Vector3[count];
-            for (var i = 0; i < count; i++)
-            {
-                var pixelCoord = new Vector2Int(
-                    Mathf.RoundToInt(uvs[i].x * intrinsics.Resolution.x),
-                    Mathf.RoundToInt(uvs[i].y * intrinsics.Resolution.y)
-                );
-                
-                var r = PassthroughCameraUtils.ScreenPointToRayInWorld(_passthroughCameraEye, pixelCoord);
-                tempCorners[i] = r.origin + r.direction * distance;
-            }
-
-            var up = (tempCorners[1] - tempCorners[0]).normalized;
-            var right = (tempCorners[2] - tempCorners[1]).normalized;
-            var normal = -Vector3.Cross(up, right).normalized;
-            var qrPlane = new Plane(normal, center);
+            var center = centerHitInfo.point;
+            var distance = Vector3.Distance(centerRay.origin, center);
             var worldCorners = new Vector3[count];
-            
+
             for (var i = 0; i < count; i++)
             {
                 var pixelCoord = new Vector2Int(
                     Mathf.RoundToInt(uvs[i].x * intrinsics.Resolution.x),
                     Mathf.RoundToInt(uvs[i].y * intrinsics.Resolution.y)
                 );
-                
                 var r = PassthroughCameraUtils.ScreenPointToRayInWorld(_passthroughCameraEye, pixelCoord);
-                if (qrPlane.Raycast(r, out var enter))
+
+                if (raycastMode == QrRaycastMode.PerCorner)
                 {
-                    worldCorners[i] = r.GetPoint(enter);
+                    if (envRaycastManager.Raycast(r, out var cornerHit))
+                    {
+                        worldCorners[i] = cornerHit.point;
+                    }
+                    else
+                    {
+                        worldCorners[i] = r.origin + r.direction * distance;
+                    }
                 }
-                else
+                else // CenterOnly
                 {
-                    worldCorners[i] = tempCorners[i];
+                    worldCorners[i] = r.origin + r.direction * distance;
                 }
             }
 
+            // Pose estimation
             center = Vector3.zero;
-            foreach (var corner in worldCorners)
+            foreach (var c in worldCorners)
             {
-                center += corner;
+                center += c;
             }
-            
             center /= count;
-            up = (worldCorners[1] - worldCorners[0]).normalized;
-            right = (worldCorners[2] - worldCorners[1]).normalized;
-            normal = -Vector3.Cross(up, right).normalized;
-            
+
+            var up = (worldCorners[1] - worldCorners[0]).normalized;
+            var right = (worldCorners[2] - worldCorners[1]).normalized;
+            var normal = -Vector3.Cross(up, right).normalized;
             var poseRot = Quaternion.LookRotation(normal, up);
+
             var width = Vector3.Distance(worldCorners[0], worldCorners[1]);
             var height = Vector3.Distance(worldCorners[0], worldCorners[3]);
             var scaleFactor = 1.5f;
@@ -128,25 +125,28 @@ public class QrCodeDisplayManager : MonoBehaviour
                 {
                     continue;
                 }
-                
+
                 marker = markerGo.GetComponent<MarkerController>();
                 if (!marker)
                 {
                     continue;
                 }
-                
+
                 marker.UpdateMarker(center, poseRot, scale, qrResult.text);
                 _activeMarkers[qrResult.text] = marker;
             }
         }
 
+        // Cleanup
         var keysToRemove = new List<string>();
         foreach (var kvp in _activeMarkers)
         {
             if (!kvp.Value.gameObject.activeSelf)
+            {
                 keysToRemove.Add(kvp.Key);
+            }
         }
-        
+
         foreach (var key in keysToRemove)
         {
             _activeMarkers.Remove(key);

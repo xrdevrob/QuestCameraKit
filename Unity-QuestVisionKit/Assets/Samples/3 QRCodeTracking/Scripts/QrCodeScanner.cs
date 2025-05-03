@@ -1,9 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using PassthroughCameraSamples;
-using UnityEngine;
+using System.Threading.Tasks;
 using UnityEngine.Rendering;
+using UnityEngine;
+using System;
 #if ZXING_ENABLED
 using ZXing;
 using ZXing.Common;
@@ -27,15 +27,16 @@ public class QrCodeResult
 public class QrCodeScanner : MonoBehaviour
 {
 #if ZXING_ENABLED
-    [SerializeField] private WebCamTextureManager camHelper;
     [SerializeField] private int sampleFactor = 2;
     [SerializeField] private QrCodeDetectionMode detectionMode = QrCodeDetectionMode.Single;
     [SerializeField] private ComputeShader downsampleShader;
 
+    private WebCamTextureManager _webCamTextureManager;
     private RenderTexture _downsampledTexture;
     private Texture2D _webcamTextureCache;
     private QRCodeReader _qrReader;
     private bool _isScanning;
+    
     private static readonly int Input1 = Shader.PropertyToID("_Input");
     private static readonly int Output = Shader.PropertyToID("_Output");
     private static readonly int InputWidth = Shader.PropertyToID("_InputWidth");
@@ -45,6 +46,7 @@ public class QrCodeScanner : MonoBehaviour
 
     private void Awake()
     {
+        _webCamTextureManager = FindAnyObjectByType<WebCamTextureManager>();
         _qrReader = new QRCodeReader();
     }
 
@@ -85,17 +87,17 @@ public class QrCodeScanner : MonoBehaviour
         _isScanning = true;
         try
         {
-            if (!camHelper)
+            if (!_webCamTextureManager)
             {
                 Debug.LogWarning("[QRCodeScanner] Camera helper is not assigned.");
                 return null;
             }
 
-            var webCamTex = camHelper.WebCamTexture;
+            var webCamTex = _webCamTextureManager.WebCamTexture;
             while (!webCamTex || !webCamTex.isPlaying)
             {
                 await Task.Delay(16);
-                webCamTex = camHelper.WebCamTexture;
+                webCamTex = _webCamTextureManager.WebCamTexture;
             }
 
             var texture = GetOrCreateTexture(webCamTex.width, webCamTex.height);
