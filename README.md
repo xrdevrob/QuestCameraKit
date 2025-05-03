@@ -33,7 +33,8 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 ## 3. 📱 QR Code Tracking with ZXing
 
 - **Purpose:** Detect and track QR codes in real time. Open webviews or log-in to 3rd party services with ease.
-- **Description:** Similarly to the object detection sample, get QR code coordinated and projects them into 3D space. Detect QR codes and call their URLs. You can select between a multiple or single QR code mode. The sample is running at around `70 fps` for multiple QR codes and a stable `72 fps` for a single code.
+- **Description:** Similarly to the object detection sample, get QR code coordinated and projects them into 3D space. Detect QR codes and call their URLs. You can select between a multiple or single QR code mode. The sample is running at around `70 fps` for multiple QR codes and a stable `72 fps` for a single code. Users are able to choose between CenterOnly and PerCorner raycasting modes via an enum in the inspector. This enables more accurate rotation tracking for use cases that require it (PerCorner), while preserving a faster fallback (CenterOnly).
+
 
 ## 4. 🪟 Shader Samples
 
