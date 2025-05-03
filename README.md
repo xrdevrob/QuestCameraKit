@@ -379,6 +379,12 @@ I wanted to dedicate this section to a couple of developers that are doing some 
   - [OpenCV marker detection for object tracking](https://x.com/taka_yoshinaga/status/1901560686603387255)
   - [OpenCV marker detection for multiple objects](https://x.com/Taka_Yoshinaga/status/1902700309933371558)
 
+- [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): Christoph was one of the first developers to publicly jump on the the Passthrough Camera API and post his prototypes. He is working on a very interesting and innovative football tracker project. This project uses the Camera2 API because it is slightly faster and less performance-demanding as oppose to Unity's WebCamTexture implementation. The football is tracked according to its color. Color tracking is handled via OpenCV for Unity. A color picker allows the user to directly select the color to be tracked from the object itself. Check out Christoph's work:
+  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [Tracking a real ball and playing some XR football](https://www.linkedin.com/feed/update/urn:li:activity:7314282273791471616/)
+  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [Custom ball-controller for the Meta Quest 3](https://www.linkedin.com/posts/christoph-spinger-280621190_i-just-worked-up-a-real-sweat-playing-vr-activity-7321457451889844225-HiTv?utm_source=share&utm_medium=member_desktop&rcm=ACoAACRDIgYBe94CQK8Ln4nJhdS1WdG2y9aZHYs)
+  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [Chameleon color picker](https://www.linkedin.com/feed/update/urn:li:activity:7306688023843250176/)
+  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [QR code object tracking](https://www.linkedin.com/feed/update/urn:li:activity:7306652200418598912/)
+
 - [Thomas Ratcliff](https://x.com/devtom7): A super talented technical artist you should definitely follow. He has been working on passthrough shaders and lighting estimation.
   - [Water, blur, zoom shaders](https://x.com/devtom7/status/1901384363658350612)
   - [Pixelate shader](https://x.com/devtom7/status/1902033672041091453)
