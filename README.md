@@ -39,7 +39,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 ## 4. 🪟 Shader Samples
 
 - **Purpose:** Apply a custom shader effect to virtual surfaces.
-- **Description:** A shader which takes our camera feed as input to manipulate the content behind it. Right now the project contains a Pixelate, Refract, Water, Zoom, and Blur effect. Frosted Glass shader is work in progress!
+- **Description:** A shader which takes our camera feed as input to manipulate the content behind it. Right now the project contains a Pixelate, Refract, Water, Zoom, Blur, GameBoy Green and VirtualBoy Red effect. Additionally examples for colorblindness red, green, blue and total have been added (Protanopia, Deuteranopia, Tritanopia, Achromatopsia). Frosted Glass shader is work in progress!
 
 | 3. 📱 QR Code Tracking                | 4. 🪟 Shader Samples                  |
 |---------------------------------------|---------------------------------------|
@@ -68,7 +68,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 | **Device Requirements**| - Only for Meta `Quest 3` and `3s`<br>- `HorizonOS v74` or later                                                                                                                                        |
 | **Unity WebcamTexture**| - Access through Unity’s WebcamTexture<br>- Only one camera at a time (left or right), a Unity limitation                                                                                               |
 | **Android Camera2 API**| - Unobstructed forward-facing RGB cameras<br>- Provides camera intrinsics (`camera ID`, `height`, `width`, `lens translation & rotation`)<br>- Android Manifest: `horizonos.permission.HEADSET_CAMERA`  |
-| **Public Experimental**| Apps using PCA are not allowed to be submitted to the Meta Horizon Store yet.                                                                                                                           |
+| **Public Experimental**| - Apps using PCA are allowed to be submitted to the Meta Horizon Store since May 2025.                                                                                                                           |
 | **Specifications**     | - Frame Rate: `30fps`<br>- Image latency: `40-60ms`<br>- Available resolutions per eye: `320x240`, `640x480`, `800x600`, `1280x960`                                                                     |
 
 ## Prerequisites
@@ -223,9 +223,10 @@ Follow the instructions in the section below to run one of the samples.
 - Open the `Shader Samples` scene.
 - Build the scene and run the APK on your headset.
 - Look at the spheres from different angles and observe how objects behind it are changing.
+- You can grab the examples too and move them around.
 
 > [!WARNING]  
-> The Meta Project Setup Tool (PST) will show a warning and tell you to uncheck it, so do not fix this warning.
+> The Meta Project Setup Tool (PST) will show a warning (opaque textures) and tell you to uncheck it, so do not fix this warning.
 
 ## 5. **[OpenAI vision model & voice commands](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-openai-vision-model)**
 - Open the `ImageLLM` scene.
@@ -396,7 +397,7 @@ I wanted to dedicate this section to a couple of developers that are doing some 
   - [SAM 2 to our workflow to segment people](https://x.com/smallfly/status/1903560186381377735)
   - [Mixed Reality + Diffusion prototype as a tool for exploring concepts, styles, and moods by transforming real-world surroundings into alternate realities.](https://x.com/smallfly/status/1916234097724215599)
 
-- [Markus Altenhofer](https://www.linkedin.com/in/markus-altenhofer-176453155/): Markus has been putting out some amazing content around Meta Quest and recently combining it with the Passthrough Camera API. You can find all his work on hit YouTube channel [FireDragonGameStudio](https://www.youtube.com/@firedragongamestudio).
+- [Markus Altenhofer](https://www.linkedin.com/in/markus-altenhofer-176453155/): Markus has been putting out some amazing content around Meta Quest and recently combining it with the Passthrough Camera API. You can find all his work on his YouTube channel [FireDragonGameStudio](https://www.youtube.com/@firedragongamestudio).
   - [Easy WebRTC video streaming to multiple devices](https://www.youtube.com/watch?v=1R9yrXePJ40)
   - [Indoor Navigation with QRCode tracking](https://www.youtube.com/watch?v=EUqaOGJxLiY&t)
   - [XR Minecraft with Meta Quest 3 Depth Sensor and ColorPicker](https://www.youtube.com/watch?v=CNoueOloXNo&t)
