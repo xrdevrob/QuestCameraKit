@@ -63,9 +63,9 @@ namespace PassthroughCameraSamples
                 if (!s_isSupported.HasValue)
                 {
                     var headset = OVRPlugin.GetSystemHeadsetType();
-                    return (headset == OVRPlugin.SystemHeadset.Meta_Quest_3 ||
-                            headset == OVRPlugin.SystemHeadset.Meta_Quest_3S) &&
-                           (!HorizonOSVersion.HasValue || HorizonOSVersion >= MINSUPPORTOSVERSION);
+                    s_isSupported = (headset == OVRPlugin.SystemHeadset.Meta_Quest_3 ||
+                                     headset == OVRPlugin.SystemHeadset.Meta_Quest_3S) &&
+                                    (!HorizonOSVersion.HasValue || HorizonOSVersion >= MINSUPPORTOSVERSION);
                 }
 
                 return s_isSupported.Value;
