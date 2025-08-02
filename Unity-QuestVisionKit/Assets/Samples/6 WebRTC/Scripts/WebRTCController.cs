@@ -12,6 +12,7 @@ namespace QuestCameraKit.WebRTC {
         [SerializeField] private RawImage canvasRawImage;
         [SerializeField] private GameObject connectionGameObject;
         [SerializeField] private bool adaptFovToCustomValue;
+        [SerializeField] private float customFovValue;
         [SerializeField] private Camera[] streamingCameras;
 
 #if WEBRTC_ENABLED
@@ -31,9 +32,9 @@ namespace QuestCameraKit.WebRTC {
                 _webRTCConnection.StartVideoTransmission();
             }
 
-            if (adaptFovToCustomValue && streamingCameras[0].fieldOfView > 100) {
+            if (adaptFovToCustomValue && streamingCameras[0].fieldOfView != customFovValue) {
                 foreach (var camera in streamingCameras) {
-                    camera.fieldOfView = 60;
+                    camera.fieldOfView = customFovValue;
                 }
             }
 

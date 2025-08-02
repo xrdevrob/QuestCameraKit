@@ -2237,6 +2237,8 @@ MonoBehaviour:
   passthroughCameraManager: {fileID: 613183142}
   canvasRawImage: {fileID: 557677174}
   connectionGameObject: {fileID: 805715864782633738}
+  adaptFovToCustomValue: 1
+  customFovValue: 60
   streamingCameras:
   - {fileID: 135406155566937053}
   - {fileID: 1581034974}
