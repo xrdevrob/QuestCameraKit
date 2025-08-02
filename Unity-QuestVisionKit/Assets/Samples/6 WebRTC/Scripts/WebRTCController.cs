@@ -11,6 +11,8 @@ namespace QuestCameraKit.WebRTC {
         [SerializeField] private WebCamTextureManager passthroughCameraManager;
         [SerializeField] private RawImage canvasRawImage;
         [SerializeField] private GameObject connectionGameObject;
+        [SerializeField] private bool adaptFovToCustomValue;
+        [SerializeField] private Camera[] streamingCameras;
 
 #if WEBRTC_ENABLED
         private WebCamTexture _webcamTexture;
@@ -28,6 +30,18 @@ namespace QuestCameraKit.WebRTC {
             if (OVRInput.Get(OVRInput.Button.Start)) {
                 _webRTCConnection.StartVideoTransmission();
             }
+
+            if (adaptFovToCustomValue && streamingCameras[0].fieldOfView > 100) {
+                foreach (var camera in streamingCameras) {
+                    camera.fieldOfView = 60;
+                }
+            }
+
+#if UNITY_EDITOR
+            if (Input.GetKeyUp(KeyCode.Space)) {
+                _webRTCConnection.StartVideoTransmission();
+            }
+#endif
         }
 #endif
     }

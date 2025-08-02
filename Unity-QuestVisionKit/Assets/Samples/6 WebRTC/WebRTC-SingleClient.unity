@@ -859,6 +859,15 @@ MonoBehaviour:
   RandomUniquePeerId: 1
   ShowLogs: 1
   ShowDataChannelLogs: 1
+  UseImmersiveSetup: 0
+  experimentalSupportFor6DOF: 0
+  experimentalSpectatorCam6DOF: {fileID: 0}
+  RenderStereo: 0
+  StereoSeparation: 0.064
+  OneEyeRenderSide: 1024
+  RTDepth: 24
+  OneFacePerFrame: 0
+  receivingRenderTexture: {fileID: 0}
   WebSocketConnectionActive: 1
   SendWebSocketTestMessage: 0
   WebSocketConnectionChanged:
