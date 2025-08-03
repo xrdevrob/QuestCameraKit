@@ -352,7 +352,7 @@ You can send commands and receive results in any of these languages:
 - Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
 
 > [!WARNING] 
-> The Meta Project Setup Tool (PST) will show 2 warnings (opaque textures and low overhead mode GLES). Do NOT fix this warnings.
+> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES and camera stack). Do NOT fix this warnings.
 
 # General Troubleshooting & Known Issues
 
