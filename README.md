@@ -349,10 +349,11 @@ You can send commands and receive results in any of these languages:
 - If you're going to stream over LAN, make sure the `STUN Server Address` field on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` is empty, otherwise leave the default value.
 - Make sure to enable the `Web Socket Connection active` flag on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` to connect to the websocket server automatically on start.
 - WebRTC video streaming does **NOT** work, when the **Graphics API** is set to **Vulkan**. Make sure to switch to **OpenGLES3** under `Project Settings/Player`.
-- Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
+- When using Oculus: Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
+- When using OpenXR: Make sure to **DISABLE** the **Meta Quest: Occlusion** and **Meta XR Subsampled Layout** settings for OpenXR in `Project Settings/XR Plug-In Management/OpenXR`. Otherwise this will prevent your Quest app from building, as these features are not supported by OpenGL. Future versions of the Unity WebRTC package will hopefully fix the Vulkan transmission issue, to make use of Vulkans full capabilities. Details can be found [here](https://github.com/Unity-Technologies/com.unity.webrtc/issues/1085)
 
 > [!WARNING] 
-> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES and camera stack). Do NOT fix this warnings.
+> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES (-> only when working with the Oculus package) and camera stack). Do NOT fix this warnings.
 
 # General Troubleshooting & Known Issues
 
