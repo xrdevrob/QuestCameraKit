@@ -93,6 +93,12 @@ Launch Unity and open the cloned project folder.
 3. **Configure Dependencies:**
 Follow the instructions in the section below to run one of the samples.
 
+## I want to use QuestCameraKit in my existing project
+If you're already working on a project, make sure to download and import (via menu Assets/Import Package/Custom Package) the Unity package located in Assets/ExportedPackage. This package contains all necessary scripts and samples of this project.
+
+### Troubleshooting the import of the custom package
+If you're not using Unity Sentis in your project, there will be errors from the Object Detection sample. Just delete the folder "Samples/2 ObjectDetection" to remove scripts depending on Unity Sentis. For the setup of the other samples and functionalities, refer to this documentation.
+
 # Running the Samples
 
 ## 1. **[Color Picker](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-color-picker)**
