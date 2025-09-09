@@ -1,6 +1,6 @@
 using Meta.XR;
 using UnityEngine;
-using Unity.Sentis;
+
 using PassthroughCameraSamples;
 using System.Collections.Generic;
 
@@ -26,7 +26,7 @@ public class ObjectRenderer : MonoBehaviour
         _mainCamera = Camera.main;
     }
     
-    public void RenderDetections(Tensor<float> coords, Tensor<int> labelIDs)
+    public void RenderDetections(Unity.InferenceEngine.Tensor<float> coords, Unity.InferenceEngine.Tensor<int> labelIDs)
     {
         var numDetections = coords.shape[0];
         print($"[Detection3DRenderer] RenderDetections: {numDetections} detections received.");

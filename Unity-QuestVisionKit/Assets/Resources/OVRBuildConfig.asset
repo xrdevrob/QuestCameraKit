@@ -11,4 +11,4 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20553fac56ec59645857c0732b787431, type: 3}
   m_Name: OVRBuildConfig
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Oculus.VR.Editor::OVRConfig
