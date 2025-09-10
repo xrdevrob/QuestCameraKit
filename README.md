@@ -93,6 +93,12 @@ Launch Unity and open the cloned project folder.
 3. **Configure Dependencies:**
 Follow the instructions in the section below to run one of the samples.
 
+## I want to use QuestCameraKit in my existing project
+If you're already working on a project, make sure to download and import (via menu Assets/Import Package/Custom Package) the Unity package located in Assets/ExportedPackage. This package contains all necessary scripts and samples of this project.
+
+### Troubleshooting the import of the custom package
+If you're not using Unity Sentis in your project, there will be errors from the Object Detection sample. Just delete the folder "Samples/2 ObjectDetection" to remove scripts depending on Unity Sentis. For the setup of the other samples and functionalities, refer to this documentation.
+
 # Running the Samples
 
 ## 1. **[Color Picker](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-color-picker)**
@@ -349,10 +355,11 @@ You can send commands and receive results in any of these languages:
 - If you're going to stream over LAN, make sure the `STUN Server Address` field on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` is empty, otherwise leave the default value.
 - Make sure to enable the `Web Socket Connection active` flag on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` to connect to the websocket server automatically on start.
 - WebRTC video streaming does **NOT** work, when the **Graphics API** is set to **Vulkan**. Make sure to switch to **OpenGLES3** under `Project Settings/Player`.
-- Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
+- When using Oculus: Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
+- When using OpenXR: Make sure to **DISABLE** the **Meta Quest: Occlusion** and **Meta XR Subsampled Layout** settings for OpenXR in `Project Settings/XR Plug-In Management/OpenXR`. Otherwise this will prevent your Quest app from building, as these features are not supported by OpenGL. Future versions of the Unity WebRTC package will hopefully fix the Vulkan transmission issue, to make use of Vulkans full capabilities. Details can be found [here](https://github.com/Unity-Technologies/com.unity.webrtc/issues/1085)
 
 > [!WARNING] 
-> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES and camera stack). Do NOT fix this warnings.
+> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES (-> only when working with the Oculus package) and camera stack). Do NOT fix this warnings.
 
 # General Troubleshooting & Known Issues
 

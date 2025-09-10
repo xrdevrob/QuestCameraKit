@@ -207,16 +207,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e933e81d3c20c74ea6fdc708a67e3a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useRecommendedMSAALevel: 1
   _monoscopic: 0
   _sharpenType: 0
-  _enableDynamicResolution: 0
+  _enableDynamicResolution: 1
   minDynamicResolutionScale: 1
   maxDynamicResolutionScale: 1
-  quest2MinDynamicResolutionScale: 1
-  quest2MaxDynamicResolutionScale: 1
-  quest3MinDynamicResolutionScale: 1
-  quest3MaxDynamicResolutionScale: 1
+  quest2MinDynamicResolutionScale: 0.7
+  quest2MaxDynamicResolutionScale: 1.3
+  quest3MinDynamicResolutionScale: 0.7
+  quest3MaxDynamicResolutionScale: 1.6
   minRenderScale: 0.7
   maxRenderScale: 1
   _headPoseRelativeOffsetRotation: {x: 0, y: 0, z: 0}
@@ -260,7 +259,7 @@ MonoBehaviour:
   requestBodyTrackingPermissionOnStartup: 0
   requestFaceTrackingPermissionOnStartup: 0
   requestEyeTrackingPermissionOnStartup: 0
-  requestScenePermissionOnStartup: 0
+  requestScenePermissionOnStartup: 1
   requestRecordAudioPermissionOnStartup: 0
   _localDimming: 1
   _trackingOriginType: 1
@@ -1389,7 +1388,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 329843572644768346, guid: 6cd586eff942d7b499b44657ba836d0b, type: 3}
       propertyPath: samplingMode
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 329843572644768346, guid: 6cd586eff942d7b499b44657ba836d0b, type: 3}
       propertyPath: raySampleOrigin

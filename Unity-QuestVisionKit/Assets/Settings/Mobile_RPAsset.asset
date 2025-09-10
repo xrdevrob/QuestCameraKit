@@ -20,14 +20,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 65bc7dbf4170f435aa868c779acfb082, type: 2}
   m_DefaultRendererIndex: 0
   m_RequireDepthTexture: 0
-  m_RequireOpaqueTexture: 1
+  m_RequireOpaqueTexture: 0
   m_OpaqueDownsampling: 0
   m_SupportsTerrainHoles: 1
   m_SupportsHDR: 0
   m_HDRColorBufferPrecision: 0
-  m_MSAA: 1
+  m_MSAA: 4
   m_RenderScale: 0.8
-  m_UpscalingFilter: 3
+  m_UpscalingFilter: 0
   m_FsrOverrideSharpness: 0
   m_FsrSharpness: 0.92
   m_EnableLODCrossFade: 1
@@ -53,6 +53,7 @@ MonoBehaviour:
   m_AdditionalLightsShadowResolutionTierHigh: 1024
   m_ReflectionProbeBlending: 1
   m_ReflectionProbeBoxProjection: 1
+  m_ReflectionProbeAtlas: 1
   m_ShadowDistance: 50
   m_ShadowCascadeCount: 4
   m_Cascade2Split: 0.25
@@ -129,6 +130,7 @@ MonoBehaviour:
   m_PrefilterScreenCoord: 1
   m_PrefilterNativeRenderPass: 1
   m_PrefilterUseLegacyLightmaps: 0
+  m_PrefilterBicubicLightmapSampling: 1
   m_ShaderVariantLogLevel: 0
   m_ShadowCascades: 0
   m_Textures:

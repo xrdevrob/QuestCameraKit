@@ -31,12 +31,15 @@ MonoBehaviour:
   disableBackups: 1
   enableNSCConfig: 1
   securityXmlPath: 
+  horizonOsSdkEnabled: 0
+  minHorizonOsSdkVersion: 68
+  targetHorizonOsSdkVersion: 77
   skipUnneededShaders: 0
   enableIL2CPPLTO: 0
   removeGradleManifest: 1
   focusAware: 1
   requiresSystemKeyboard: 0
-  experimentalFeaturesEnabled: 0
+  experimentalFeaturesEnabled: 1
   insightPassthroughEnabled: 0
   _insightPassthroughSupport: 1
   _processorFavor: 0

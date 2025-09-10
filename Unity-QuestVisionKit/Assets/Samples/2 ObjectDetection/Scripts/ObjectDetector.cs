@@ -1,14 +1,14 @@
 using System;
 using UnityEngine;
-using Unity.Sentis;
+
 using System.Collections;
 using PassthroughCameraSamples;
 
 public class ObjectDetector : MonoBehaviour
 {
     [Header("Environment Sampling")]
-    [SerializeField] private ModelAsset sentisModel;
-    [SerializeField] private BackendType backend = BackendType.CPU;
+    [SerializeField] private Unity.InferenceEngine.ModelAsset sentisModel;
+    [SerializeField] private Unity.InferenceEngine.BackendType backend = Unity.InferenceEngine.BackendType.CPU;
     [SerializeField] private float inferenceInterval = 0.1f;
     [SerializeField] private int kLayersPerFrame = 20;
     
@@ -16,8 +16,8 @@ public class ObjectDetector : MonoBehaviour
     [SerializeField] private WebCamTextureManager webCamTextureManager;
     [SerializeField] private ObjectRenderer objectRenderer;
 
-    private Model _model;
-    private Worker _engine;
+    private Unity.InferenceEngine.Model _model;
+    private Unity.InferenceEngine.Worker _engine;
     private Texture2D _cpuTexture;
     private Coroutine _inferenceCoroutine;
     private WebCamTexture _webcamTexture;
@@ -62,8 +62,8 @@ public class ObjectDetector : MonoBehaviour
     {
         try
         {
-            _model = ModelLoader.Load(sentisModel);
-            _engine = new Worker(_model, backend);
+            _model = Unity.InferenceEngine.ModelLoader.Load(sentisModel);
+            _engine = new Unity.InferenceEngine.Worker(_model, backend);
             print("[ObjectDetector] Model loaded successfully.");
         }
         catch (Exception e)
@@ -105,7 +105,7 @@ public class ObjectDetector : MonoBehaviour
 
     private IEnumerator PerformInference(Texture texture)
     {
-        var inputTensor = TextureConverter.ToTensor(texture, InputSize, InputSize, 3);
+        var inputTensor = Unity.InferenceEngine.TextureConverter.ToTensor(texture, InputSize, InputSize, 3);
         print("[ObjectDetector] Input tensor created.");
 
         var schedule = _engine.ScheduleIterable(inputTensor);
@@ -126,10 +126,10 @@ public class ObjectDetector : MonoBehaviour
             Debug.Log("[ObjectDetector] Inference schedule complete.");
         }
 
-        Tensor<float> coordsOutput = null;
-        Tensor<int> labelIDsOutput = null;
-        Tensor<float> pullCoords = _engine.PeekOutput(0) as Tensor<float>;
-        Tensor<int> pullLabelIDs = _engine.PeekOutput(1) as Tensor<int>;
+        Unity.InferenceEngine.Tensor<float> coordsOutput = null;
+        Unity.InferenceEngine.Tensor<int> labelIDsOutput = null;
+        Unity.InferenceEngine.Tensor<float> pullCoords = _engine.PeekOutput(0) as Unity.InferenceEngine.Tensor<float>;
+        Unity.InferenceEngine.Tensor<int> pullLabelIDs = _engine.PeekOutput(1) as Unity.InferenceEngine.Tensor<int>;
 
         var isWaiting = false;
         var downloadState = 0;
