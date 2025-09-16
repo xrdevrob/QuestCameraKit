@@ -68,7 +68,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
 | 7. 📅 Experimental QRCode detection            |
 |------------------------------------------------|
-| <img src="Media/QrCodeDetection.png" alt="QrCodeDetection" width="50%")                |
+| <p align="center" width="100%"><img alt="QrCodeDetection" width="33%" src="Media/QrCodeDetection.png"></p>                |
 
 # Getting Started with PCA
 
@@ -341,23 +341,20 @@ You can send commands and receive results in any of these languages:
 
 - Open the `Package Manager`, click on the + sign in the upper left/right corner.
 	- Select "Add package from git URL".
-	- Enter URL: 
+	- Enter URL and click on Install:
 	```
 	https://github.com/endel/NativeWebSocket.git#upm
-	```
-	and click in Install.
+	```	
 	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL 
+	- Enter URL and click on Install:
 	```
 	https://github.com/Unity-Technologies/com.unity.webrtc.git
 	```
-	and click on Install
 	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL 
+	- Enter URL and click on Install:
 	```
 	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
 	```
-	and click on Install
 - Open the `WebRTC-Quest` scene.
 - Link up your signaling server on the `Client-STUNConnection` component in the `Web Socket Server Address` field.
 - Build and deploy the `WebRTC-Quest` scene to your Quest3 device.
@@ -370,22 +367,20 @@ You can send commands and receive results in any of these languages:
 - If there are compiler errors, make sure all packages were imported correctly.
 	- Open the `Package Manager`, click on the + sign in the upper left/right corner.
 	- Select "Add package from git URL".
-	- Enter URL:
+	- Enter URL and click on Install:
 	```
 	https://github.com/endel/NativeWebSocket.git#upm
 	```
-	and click in Install.
 	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL 
+	- Enter URL and click on Install:
 	```
 	https://github.com/Unity-Technologies/com.unity.webrtc.git
 	```
 	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL
+	- Enter URL and click on Install:
 	```
 	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
 	```
-	and click on Install
 	- Use the menu `Tools/Update WebRTC Define Symbol` to update the scripting define symbols if needed.
 - Make sure your own websocket signaling server is up and running. You can find more information about the necessary steps [here](https://youtu.be/-CwJTgt_Z3M?t=1458).
 - If you're going to stream over LAN, make sure the `STUN Server Address` field on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` is empty, otherwise leave the default value.
