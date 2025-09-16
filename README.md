@@ -66,6 +66,10 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 - **Purpose:** Detect and track QRCodes without having to use a third-party library.
 - **Description:** As this feature is still in experimental state, make sure to use experimental mode on your Quest3 when testing. Unity usually asks for enabling that, before building. You can activate it via command line command using Meta Quest Hub too. More information can be found here - [MR Utility Kit QRCode Detection](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection) and here - [Mobile Experimental Features](https://developers.meta.com/horizon/documentation/native/android/mobile-experimental-features/)
 
+| 7. 📅 Experimental QRCode detection            |
+|------------------------------------------------|
+| ![QRCodeDetection](Media/QrCodeDetection.png)                |
+
 # Getting Started with PCA
 
 | **Information**        | **Details**                                                                                                                                                                                             |
@@ -338,15 +342,21 @@ You can send commands and receive results in any of these languages:
 - Open the `Package Manager`, click on the + sign in the upper left/right corner.
 	- Select "Add package from git URL".
 	- Enter URL: 
-	```https://github.com/endel/NativeWebSocket.git#upm```
+	```
+	https://github.com/endel/NativeWebSocket.git#upm
+	```
 	and click in Install.
 	- After the installation finished, click on the + sign in the upper left/right corner again.
 	- Enter URL 
-	```https://github.com/Unity-Technologies/com.unity.webrtc.git```
+	```
+	https://github.com/Unity-Technologies/com.unity.webrtc.git
+	```
 	and click on Install
 	- After the installation finished, click on the + sign in the upper left/right corner again.
 	- Enter URL 
-	```https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC```
+	```
+	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
+	```
 	and click on Install
 - Open the `WebRTC-Quest` scene.
 - Link up your signaling server on the `Client-STUNConnection` component in the `Web Socket Server Address` field.
@@ -361,14 +371,20 @@ You can send commands and receive results in any of these languages:
 	- Open the `Package Manager`, click on the + sign in the upper left/right corner.
 	- Select "Add package from git URL".
 	- Enter URL:
-	```https://github.com/endel/NativeWebSocket.git#upm```
+	```
+	https://github.com/endel/NativeWebSocket.git#upm
+	```
 	and click in Install.
 	- After the installation finished, click on the + sign in the upper left/right corner again.
 	- Enter URL 
-	```https://github.com/Unity-Technologies/com.unity.webrtc.git```
+	```
+	https://github.com/Unity-Technologies/com.unity.webrtc.git
+	```
 	- After the installation finished, click on the + sign in the upper left/right corner again.
 	- Enter URL
-	```https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC```
+	```
+	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
+	```
 	and click on Install
 	- Use the menu `Tools/Update WebRTC Define Symbol` to update the scripting define symbols if needed.
 - Make sure your own websocket signaling server is up and running. You can find more information about the necessary steps [here](https://youtu.be/-CwJTgt_Z3M?t=1458).
