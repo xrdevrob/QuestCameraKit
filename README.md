@@ -68,7 +68,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
 | 7. 📅 Experimental QRCode detection            |
 |------------------------------------------------|
-| ![QRCodeDetection](Media/QrCodeDetection.png)                |
+| <img src="Media/QrCodeDetection.png" alt="QrCodeDetection" width="50%")                |
 
 # Getting Started with PCA
 
