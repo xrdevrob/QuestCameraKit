@@ -61,6 +61,15 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 |------------------------------------------------|
 | ![WebRTC](Media/PCA_WebRTC.gif)                |
 
+## 7. 📅 Experimental QR Code detection
+
+- **Purpose:** Detect and track QRCodes without having to use a third-party library.
+- **Description:** As this feature is still in experimental state, make sure to use experimental mode on your Quest3 when testing. Unity usually asks for enabling that, before building. You can activate it via command line command using Meta Quest Hub too. More information can be found here - [MR Utility Kit QRCode Detection](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection) and here - [Mobile Experimental Features](https://developers.meta.com/horizon/documentation/native/android/mobile-experimental-features/)
+
+| 7. 📅 Experimental QRCode detection            |
+|------------------------------------------------|
+| <p align="center" width="100%"><img alt="QrCodeDetection" width="33%" src="Media/QrCodeDetection.png"></p>                |
+
 # Getting Started with PCA
 
 | **Information**        | **Details**                                                                                                                                                                                             |
@@ -332,9 +341,20 @@ You can send commands and receive results in any of these languages:
 
 - Open the `Package Manager`, click on the + sign in the upper left/right corner.
 	- Select "Add package from git URL".
-	- Enter URL: ```https://github.com/endel/NativeWebSocket.git#upm``` and click in Install.
+	- Enter URL and click on Install:
+	```
+	https://github.com/endel/NativeWebSocket.git#upm
+	```	
 	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL ```https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC``` and click on Install
+	- Enter URL and click on Install:
+	```
+	https://github.com/Unity-Technologies/com.unity.webrtc.git
+	```
+	- After the installation finished, click on the + sign in the upper left/right corner again.
+	- Enter URL and click on Install:
+	```
+	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
+	```
 - Open the `WebRTC-Quest` scene.
 - Link up your signaling server on the `Client-STUNConnection` component in the `Web Socket Server Address` field.
 - Build and deploy the `WebRTC-Quest` scene to your Quest3 device.
@@ -347,19 +367,41 @@ You can send commands and receive results in any of these languages:
 - If there are compiler errors, make sure all packages were imported correctly.
 	- Open the `Package Manager`, click on the + sign in the upper left/right corner.
 	- Select "Add package from git URL".
-	- Enter URL: ```https://github.com/endel/NativeWebSocket.git#upm``` and click in Install.
+	- Enter URL and click on Install:
+	```
+	https://github.com/endel/NativeWebSocket.git#upm
+	```
 	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL ```https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC``` and click on Install
+	- Enter URL and click on Install:
+	```
+	https://github.com/Unity-Technologies/com.unity.webrtc.git
+	```
+	- After the installation finished, click on the + sign in the upper left/right corner again.
+	- Enter URL and click on Install:
+	```
+	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
+	```
 	- Use the menu `Tools/Update WebRTC Define Symbol` to update the scripting define symbols if needed.
 - Make sure your own websocket signaling server is up and running. You can find more information about the necessary steps [here](https://youtu.be/-CwJTgt_Z3M?t=1458).
 - If you're going to stream over LAN, make sure the `STUN Server Address` field on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` is empty, otherwise leave the default value.
 - Make sure to enable the `Web Socket Connection active` flag on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` to connect to the websocket server automatically on start.
-- WebRTC video streaming does **NOT** work, when the **Graphics API** is set to **Vulkan**. Make sure to switch to **OpenGLES3** under `Project Settings/Player`.
-- When using Oculus: Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
-- When using OpenXR: Make sure to **DISABLE** the **Meta Quest: Occlusion** and **Meta XR Subsampled Layout** settings for OpenXR in `Project Settings/XR Plug-In Management/OpenXR`. Otherwise this will prevent your Quest app from building, as these features are not supported by OpenGL. Future versions of the Unity WebRTC package will hopefully fix the Vulkan transmission issue, to make use of Vulkans full capabilities. Details can be found [here](https://github.com/Unity-Technologies/com.unity.webrtc/issues/1085)
+- WebRTC video streaming **DOES** work, when the **Graphics API** is set to **Vulkan** (as of Unity WebRTC version 3.0.0). It works with **OPENGLES3** too. Make sure to use the right **Graphics API** for your project under `Project Settings/Player`.
+	- When using **OPENGLES3** and **Oculus**: Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
+	- When using **OPENGLES3** and **OpenXR**: Make sure to **DISABLE** the **Meta Quest: Occlusion** and **Meta XR Subsampled Layout** settings for OpenXR in `Project Settings/XR Plug-In Management/OpenXR`. Otherwise this will prevent your Quest app from building, as these features are not supported by OpenGL.
 
 > [!WARNING] 
-> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES (-> only when working with the Oculus package) and camera stack). Do NOT fix this warnings.
+> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES (-> only when working with **OPENGLES3** and the Oculus package) and camera stack). Do NOT fix this warnings.
+
+## 7. **[Experimental QRCode detection](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-experimental-qrcode-detection)**
+
+- Make sure TextMeshPro essentials are installed.
+- Enable experimental mode on your Quest3. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
+- Build and deploy the `QRCodeDetection` scene to your Quest3 device.
+- Use your controllers to interact with the UI. No hand tracking support yet.
+
+**Troubleshooting**:
+- Go to `Window/TextMeshPro` and click on `Import TMP Essential Resources`
+- Make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
 
 # General Troubleshooting & Known Issues
 
