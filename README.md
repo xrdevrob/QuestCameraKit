@@ -57,18 +57,14 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 - **Purpose:** Stream the Passthrough Camera stream over WebRTC to another client using WebSockets.
 - **Description:** This sample uses [SimpleWebRTC](https://assetstore.unity.com/packages/tools/network/simplewebrtc-309727), which is a Unity-based WebRTC wrapper that facilitates peer-to-peer audio, video, and data communication over WebRTC using [Unitys WebRTC package](https://docs.unity3d.com/Packages/com.unity.webrtc@3.0/manual/index.html). It leverages [NativeWebSocket](https://github.com/endel/NativeWebSocket) for signaling and supports both video and audio streaming. You will need to setup your own websocket signaling server beforehand, either online or in LAN. You can find more information about the necessary steps [here](https://www.youtube.com/watch?v=-CwJTgt_Z3M)
 
-| 6. 🎥 WebRTC video streaming                   |
-|------------------------------------------------|
-| ![WebRTC](Media/PCA_WebRTC.gif)                |
-
 ## 7. 📅 Experimental QR Code detection
 
 - **Purpose:** Detect and track QRCodes without having to use a third-party library.
 - **Description:** As this feature is still in experimental state, make sure to use experimental mode on your Quest3 when testing. Unity usually asks for enabling that, before building. You can activate it via command line command using Meta Quest Hub too. More information can be found here - [MR Utility Kit QRCode Detection](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection) and here - [Mobile Experimental Features](https://developers.meta.com/horizon/documentation/native/android/mobile-experimental-features/)
 
-| 7. 📅 Experimental QRCode detection            |
-|------------------------------------------------|
-| <p align="center" width="100%"><img alt="QrCodeDetection" width="33%" src="Media/QrCodeDetection.png"></p>                |
+| 6. 🎥 WebRTC video streaming | 7. 📅 Experimental QRCode detection |
+|------------------------------|------------------------------------|
+| <img src="Media/PCA_WebRTC.gif" width="500"/> | <img src="Media/QrCodeDetection.png" width="500"/> |
 
 # Getting Started with PCA
 
@@ -77,7 +73,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 | **Device Requirements**| - Only for Meta `Quest 3` and `3s`<br>- `HorizonOS v74` or later                                                                                                                                        |
 | **Unity WebcamTexture**| - Access through Unity’s WebcamTexture<br>- Only one camera at a time (left or right), a Unity limitation                                                                                               |
 | **Android Camera2 API**| - Unobstructed forward-facing RGB cameras<br>- Provides camera intrinsics (`camera ID`, `height`, `width`, `lens translation & rotation`)<br>- Android Manifest: `horizonos.permission.HEADSET_CAMERA`  |
-| **Public Experimental**| - Apps using PCA are allowed to be submitted to the Meta Horizon Store since May 2025.                                                                                                                           |
+| **Public Experimental**| - Apps using PCA are allowed to be submitted to the Meta Horizon Store since May 2025.                                                                                                                  |
 | **Specifications**     | - Frame Rate: `30fps`<br>- Image latency: `40-60ms`<br>- Available resolutions per eye: `320x240`, `640x480`, `800x600`, `1280x960`                                                                     |
 
 ## Prerequisites
