@@ -4,7 +4,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 [![Join our Discord](https://img.shields.io/badge/Join-Discord-blue?style=social&logo=discord)](https://discord.com/invite/KkstGGwueN)
 
 # Table of Contents
-- [Overview](#overview)
+- [PCA Samples](#pca-samples)
 - [Update Notes](#update-notes)
 - [Getting Started with PCA](#getting-started-with-pca)
 - [Running the Samples](#running-the-samples)
