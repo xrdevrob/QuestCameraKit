@@ -1,14 +1,12 @@
-using System;
 using System.Collections.Generic;
-using Meta.XR;
 using UnityEngine;
+using Meta.XR;
 
 public class QrCodeDisplayManager : MonoBehaviour
 {
 #if ZXING_ENABLED
-    [SerializeField] private QrCodeScanner scanner;
-    [SerializeField] private EnvironmentRaycastManager envRaycastManager;
-
+    private QrCodeScanner _scanner;
+    private EnvironmentRaycastManager _envRaycastManager;
     private readonly Dictionary<string, MarkerController> _activeMarkers = new();
 
     private enum QrRaycastMode
@@ -19,125 +17,45 @@ public class QrCodeDisplayManager : MonoBehaviour
     
     [SerializeField] private QrRaycastMode raycastMode = QrRaycastMode.PerCorner;
 
-    private void Update()
+    private void Awake()
     {
-        UpdateMarkers();
+        _scanner = GetComponent<QrCodeScanner>();
+        _envRaycastManager = GetComponent<EnvironmentRaycastManager>();
     }
-    
-    private async void UpdateMarkers()
+
+    private void Update() => RefreshMarkers();
+
+    private async void RefreshMarkers()
     {
-        if (!envRaycastManager)
+        if (!_envRaycastManager || !_scanner)
         {
             return;
         }
 
-        var qrResults = await scanner.ScanFrameAsync() ?? Array.Empty<QrCodeResult>();
+        var qrResults = await _scanner.ScanFrameAsync();
+        if (qrResults == null || qrResults.Length == 0)
+        {
+            CleanupInactiveMarkers();
+            return;
+        }
 
         foreach (var qrResult in qrResults)
         {
-            if (qrResult?.corners == null || qrResult.corners.Length < 4)
+            if (!TryBuildMarkerPose(qrResult, out var pose, out var scale))
             {
                 continue;
             }
 
-            var count = qrResult.corners.Length;
-            var uvs = new Vector2[count];
-            for (var i = 0; i < count; i++)
-            {
-                uvs[i] = new Vector2(qrResult.corners[i].x, qrResult.corners[i].y);
-            }
-
-            var centerUV = Vector2.zero;
-            foreach (var uv in uvs) centerUV += uv;
-            centerUV /= count;
-
-            var centerRay = BuildWorldRay(qrResult, centerUV);
-            if (!envRaycastManager.Raycast(centerRay, out var centerHitInfo))
+            var marker = GetOrCreateMarker(qrResult.text);
+            if (!marker)
             {
                 continue;
             }
 
-            var center = centerHitInfo.point;
-            var distance = Vector3.Distance(centerRay.origin, center);
-            var qrPlane = new Plane(centerHitInfo.normal, centerHitInfo.point);
-            var worldCorners = new Vector3[count];
-
-            for (var i = 0; i < count; i++)
-            {
-                var r = BuildWorldRay(qrResult, uvs[i]);
-
-                if (raycastMode == QrRaycastMode.PerCorner)
-                {
-                    if (envRaycastManager.Raycast(r, out var cornerHit))
-                    {
-                        worldCorners[i] = cornerHit.point;
-                    }
-                    else
-                    {
-                        worldCorners[i] = ProjectOntoPlane(qrPlane, r, distance);
-                    }
-                }
-                else // CenterOnly
-                {
-                    worldCorners[i] = ProjectOntoPlane(qrPlane, r, distance);
-                }
-            }
-
-            // Pose estimation
-            center = Vector3.zero;
-            foreach (var c in worldCorners)
-            {
-                center += c;
-            }
-            center /= count;
-
-            var up = (worldCorners[1] - worldCorners[0]).normalized;
-            var right = (worldCorners[2] - worldCorners[1]).normalized;
-            var normal = -Vector3.Cross(up, right).normalized;
-            var poseRot = Quaternion.LookRotation(normal, up);
-
-            var width = Vector3.Distance(worldCorners[0], worldCorners[1]);
-            var height = Vector3.Distance(worldCorners[0], worldCorners[3]);
-            var scaleFactor = 1.5f;
-            var scale = new Vector3(width * scaleFactor, height * scaleFactor, 1f);
-
-            if (_activeMarkers.TryGetValue(qrResult.text, out var marker))
-            {
-                marker.UpdateMarker(center, poseRot, scale, qrResult.text);
-            }
-            else
-            {
-                var markerGo = MarkerPool.Instance.GetMarker();
-                if (!markerGo)
-                {
-                    continue;
-                }
-
-                marker = markerGo.GetComponent<MarkerController>();
-                if (!marker)
-                {
-                    continue;
-                }
-
-                marker.UpdateMarker(center, poseRot, scale, qrResult.text);
-                _activeMarkers[qrResult.text] = marker;
-            }
+            marker.UpdateMarker(pose.position, pose.rotation, scale, qrResult.text);
         }
 
-        // Cleanup
-        var keysToRemove = new List<string>();
-        foreach (var kvp in _activeMarkers)
-        {
-            if (!kvp.Value.gameObject.activeSelf)
-            {
-                keysToRemove.Add(kvp.Key);
-            }
-        }
-
-        foreach (var key in keysToRemove)
-        {
-            _activeMarkers.Remove(key);
-        }
+        CleanupInactiveMarkers();
     }
 #endif
 
@@ -146,7 +64,7 @@ public class QrCodeDisplayManager : MonoBehaviour
     private static Ray BuildWorldRay(QrCodeResult result, Vector2 uv)
     {
         var viewport = ToViewport(uv);
-        var intrinsics = result.intrinsics;
+        var intrinsics = result.Intrinsics;
         var sensorResolution = (Vector2)intrinsics.SensorResolution;
         var currentResolution = (Vector2)result.captureResolution;
         if (currentResolution == Vector2.zero)
@@ -197,5 +115,113 @@ public class QrCodeDisplayManager : MonoBehaviour
         return plane.Raycast(ray, out var planeDistance)
             ? ray.GetPoint(planeDistance)
             : ray.GetPoint(fallbackDistance);
+    }
+
+    private bool TryBuildMarkerPose(QrCodeResult result, out Pose pose, out Vector3 scale)
+    {
+        pose = default;
+        scale = default;
+
+        if (result?.corners == null || result.corners.Length < 4)
+        {
+            return false;
+        }
+
+        var count = result.corners.Length;
+        var uvs = new Vector2[count];
+        for (var i = 0; i < count; i++)
+        {
+            uvs[i] = new Vector2(result.corners[i].x, result.corners[i].y);
+        }
+
+        var centerUV = Vector2.zero;
+        foreach (var uv in uvs)
+        {
+            centerUV += uv;
+        }
+        centerUV /= count;
+
+        var centerRay = BuildWorldRay(result, centerUV);
+        if (!_envRaycastManager.Raycast(centerRay, out var centerHit))
+        {
+            return false;
+        }
+
+        var center = centerHit.point;
+        var distance = Vector3.Distance(centerRay.origin, center);
+        var plane = new Plane(centerHit.normal, centerHit.point);
+        var worldCorners = new Vector3[count];
+
+        for (var i = 0; i < count; i++)
+        {
+            var ray = BuildWorldRay(result, uvs[i]);
+            if (raycastMode == QrRaycastMode.PerCorner && _envRaycastManager.Raycast(ray, out var cornerHit))
+            {
+                worldCorners[i] = cornerHit.point;
+            }
+            else
+            {
+                worldCorners[i] = ProjectOntoPlane(plane, ray, distance);
+            }
+        }
+
+        center = Vector3.zero;
+        foreach (var c in worldCorners)
+        {
+            center += c;
+        }
+        center /= count;
+
+        var up = (worldCorners[1] - worldCorners[0]).normalized;
+        var right = (worldCorners[2] - worldCorners[1]).normalized;
+        var normal = -Vector3.Cross(up, right).normalized;
+        var rotation = Quaternion.LookRotation(normal, up);
+
+        var width = Vector3.Distance(worldCorners[0], worldCorners[1]);
+        var height = Vector3.Distance(worldCorners[0], worldCorners[3]);
+        var scaleFactor = 1.5f;
+        scale = new Vector3(width * scaleFactor, height * scaleFactor, 1f);
+        pose = new Pose(center, rotation);
+        return true;
+    }
+
+    private MarkerController GetOrCreateMarker(string key)
+    {
+        if (_activeMarkers.TryGetValue(key, out var marker))
+        {
+            return marker;
+        }
+
+        var markerGo = MarkerPool.Instance ? MarkerPool.Instance.GetMarker() : null;
+        if (!markerGo)
+        {
+            return null;
+        }
+
+        marker = markerGo.GetComponent<MarkerController>();
+        if (!marker)
+        {
+            return null;
+        }
+
+        _activeMarkers[key] = marker;
+        return marker;
+    }
+
+    private void CleanupInactiveMarkers()
+    {
+        var keysToRemove = new List<string>();
+        foreach (var kvp in _activeMarkers)
+        {
+            if (!kvp.Value || !kvp.Value.gameObject.activeSelf)
+            {
+                keysToRemove.Add(kvp.Key);
+            }
+        }
+
+        foreach (var key in keysToRemove)
+        {
+            _activeMarkers.Remove(key);
+        }
     }
 }

@@ -1,13 +1,10 @@
-using System;
 using System.Collections.Generic;
-using Meta.XR;
 using UnityEngine;
+using Meta.XR;
 
 public class ObjectRenderer : MonoBehaviour
 {
     [Header("Camera & Raycast Settings")]
-    [SerializeField] private PassthroughCameraAccess cameraAccess;
-    [SerializeField] private EnvironmentRaycastManager envRaycastManager;
     [SerializeField] private float mergeThreshold = 0.2f;
     
     [Header("Marker Settings")]
@@ -18,27 +15,24 @@ public class ObjectRenderer : MonoBehaviour
 
     private Camera _mainCamera;
     private const float YoloInputSize = 640f;
+    private PassthroughCameraAccess _cameraAccess;
+    private EnvironmentRaycastManager _envRaycastManager;
     private readonly Dictionary<string, MarkerController> _activeMarkers = new();
 
     private void Awake()
     {
+        _cameraAccess = GetComponent<PassthroughCameraAccess>();
+        _envRaycastManager = GetComponent<EnvironmentRaycastManager>();
+        if (!_cameraAccess || !_envRaycastManager)
+        {
+            Debug.LogWarning("[Detection3DRenderer] Passthrough camera or Environment Raycast Manager is not ready.");
+            return;
+        }
         _mainCamera = Camera.main;
     }
     
     public void RenderDetections(Unity.InferenceEngine.Tensor<float> coords, Unity.InferenceEngine.Tensor<int> labelIDs)
     {
-        cameraAccess = ResolveCameraAccess(cameraAccess);
-        if (!cameraAccess || !cameraAccess.IsPlaying)
-        {
-            Debug.LogWarning("[Detection3DRenderer] Passthrough camera is not ready.");
-            return;
-        }
-        if (!envRaycastManager)
-        {
-            Debug.LogWarning("[Detection3DRenderer] EnvironmentRaycastManager missing.");
-            return;
-        }
-
         var numDetections = coords.shape[0];
         print($"[Detection3DRenderer] RenderDetections: {numDetections} detections received.");
         ClearPreviousMarkers();
@@ -61,9 +55,9 @@ public class ObjectRenderer : MonoBehaviour
             var perX = (adjustedCenterX + halfWidth) / imageWidth;
             var perY = (adjustedCenterY + halfHeight) / imageHeight;
 
-            var centerRay = cameraAccess.ViewportPointToRay(ToViewport(perX, perY));
+            var centerRay = _cameraAccess.ViewportPointToRay(ToViewport(perX, perY));
 
-            if (!envRaycastManager.Raycast(centerRay, out var centerHit))
+            if (!_envRaycastManager.Raycast(centerRay, out var centerHit))
             {
                 Debug.LogWarning($"[Detection3DRenderer] Detection {i}: Environment raycast failed.");
                 continue;
@@ -76,8 +70,8 @@ public class ObjectRenderer : MonoBehaviour
             var u2 = (detectedCenterX + detectedWidth * 0.5f) / imageWidth;
             var v2 = (detectedCenterY + detectedHeight * 0.5f) / imageHeight;
 
-            var tlRay = cameraAccess.ViewportPointToRay(ToViewport(u1, v1));
-            var brRay = cameraAccess.ViewportPointToRay(ToViewport(u2, v2));
+            var tlRay = _cameraAccess.ViewportPointToRay(ToViewport(u1, v1));
+            var brRay = _cameraAccess.ViewportPointToRay(ToViewport(u2, v2));
 
             var depth = Vector3.Distance(_mainCamera.transform.position, markerWorldPos);
             var worldTL = tlRay.GetPoint(depth);
@@ -134,14 +128,5 @@ public class ObjectRenderer : MonoBehaviour
     private static Vector2 ToViewport(float normalizedX, float normalizedY)
     {
         return new Vector2(Mathf.Clamp01(normalizedX), Mathf.Clamp01(1f - Mathf.Clamp01(normalizedY)));
-    }
-
-    private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
-    {
-        if (configuredAccess)
-        {
-            return configuredAccess;
-        }
-        return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
     }
 }

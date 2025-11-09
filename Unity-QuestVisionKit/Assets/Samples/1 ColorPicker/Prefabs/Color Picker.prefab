@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6035143794370752181
+--- !u!1 &5899532057855875881
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,12 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6654650586598888756}
-  - component: {fileID: 329843572644768346}
-  - component: {fileID: 6823719782492499434}
-  - component: {fileID: 611158415039513400}
-  - component: {fileID: 7986538177110669349}
+  - component: {fileID: 2441444502329211079}
+  - component: {fileID: 5157987223500070853}
+  - component: {fileID: 2013406950531756749}
+  - component: {fileID: 6564703602380990516}
+  - component: {fileID: 3472350195219984843}
+  - component: {fileID: 9139148891952313432}
   m_Layer: 0
   m_Name: Color Picker
   m_TagString: Untagged
@@ -20,13 +21,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6654650586598888756
+--- !u!4 &2441444502329211079
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6035143794370752181}
+  m_GameObject: {fileID: 5899532057855875881}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -35,48 +36,64 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &329843572644768346
+--- !u!114 &5157987223500070853
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6035143794370752181}
+  m_GameObject: {fileID: 5899532057855875881}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8a9032c8b76ce84fb4f8ca99566bbd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  environmentRaycastManager: {fileID: 6823719782492499434}
-  passthroughCameraManager: {fileID: 0}
   samplingMode: 0
   raySampleOrigin: {fileID: 0}
-  lineRenderer: {fileID: 7986538177110669349}
+  lineRenderer: {fileID: 9139148891952313432}
   manualSamplingOrigin: {fileID: 0}
   targetBrightness: 0.8
   correctionSmoothing: 0.5
   roiSize: 3
   minCorrection: 0.8
   maxCorrection: 1.5
---- !u!114 &6823719782492499434
+  cameraAccess: {fileID: 2013406950531756749}
+--- !u!114 &2013406950531756749
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6035143794370752181}
+  m_GameObject: {fileID: 5899532057855875881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef9a7893e57c04c0db4114c70954b915, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: meta.xr.mrutilitykit::Meta.XR.PassthroughCameraAccess
+  CameraPosition: 0
+  RequestedResolution: {x: 1280, y: 960}
+  TargetMaterial: {fileID: 0}
+  _texturePropertyName: 
+--- !u!114 &6564703602380990516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5899532057855875881}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d8affdff7ba47d892cc734baac9ac71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &611158415039513400
+  CustomTrackingSpace: {fileID: 0}
+--- !u!114 &3472350195219984843
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6035143794370752181}
+  m_GameObject: {fileID: 5899532057855875881}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71a155ece80369d4e99bdaf5e59169b5, type: 3}
@@ -86,15 +103,14 @@ MonoBehaviour:
   _removeHands: 0
   CustomTrackingSpace: {fileID: 0}
   <MaskMeshFilters>k__BackingField: []
-  _cameraRig: {fileID: 0}
---- !u!120 &7986538177110669349
+--- !u!120 &9139148891952313432
 LineRenderer:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6035143794370752181}
+  m_GameObject: {fileID: 5899532057855875881}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -108,6 +124,8 @@ LineRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -129,6 +147,7 @@ LineRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0

@@ -1,7 +1,7 @@
-using System;
 using System.Collections;
-using Meta.XR;
 using UnityEngine;
+using Meta.XR;
+using System;
 
 public class ObjectDetector : MonoBehaviour
 {
@@ -11,26 +11,25 @@ public class ObjectDetector : MonoBehaviour
     [SerializeField] private float inferenceInterval = 0.1f;
     [SerializeField] private int kLayersPerFrame = 20;
     
-    [Header("Detection Settings")]
-    [SerializeField] private PassthroughCameraAccess cameraAccess;
-    [SerializeField] private ObjectRenderer objectRenderer;
-
+    private PassthroughCameraAccess _cameraAccess;
     private Unity.InferenceEngine.Model _model;
     private Unity.InferenceEngine.Worker _engine;
+    private ObjectRenderer _objectRenderer;
     private Coroutine _inferenceCoroutine;
     private Texture _cameraTexture;
     private const int InputSize = 640;
 
     private void Start()
     {
-        cameraAccess = ResolveCameraAccess(cameraAccess);
-        if (!cameraAccess)
+        _cameraAccess = GetComponent<PassthroughCameraAccess>();
+        _objectRenderer = GetComponent<ObjectRenderer>();
+        
+        if (!_cameraAccess || !_objectRenderer)
         {
-            Debug.LogError("[ObjectDetector] PassthroughCameraAccess not found in the scene.");
-            enabled = false;
+            Debug.LogError("[ObjectDetector] PassthroughCameraAccess or Object Renderer not found in the scene.");
             return;
         }
-
+        
         LoadModel();
         _inferenceCoroutine = StartCoroutine(InferenceLoop());
     }
@@ -42,6 +41,7 @@ public class ObjectDetector : MonoBehaviour
             StopCoroutine(_inferenceCoroutine);
             _inferenceCoroutine = null;
         }
+        
         _engine?.Dispose();
         print("[ObjectDetector] Destroyed and cleaned up.");
     }
@@ -72,7 +72,6 @@ public class ObjectDetector : MonoBehaviour
 
             yield return new WaitForSeconds(inferenceInterval);
 
-            print("[ObjectDetector] Running inference iteration.");
             yield return StartCoroutine(PerformInference(_cameraTexture));
         }
     }
@@ -98,8 +97,6 @@ public class ObjectDetector : MonoBehaviour
                 if (++it % kLayersPerFrame == 0)
                     yield return null;
             }
-            
-            Debug.Log("[ObjectDetector] Inference schedule complete.");
         }
 
         Unity.InferenceEngine.Tensor<float> coordsOutput = null;
@@ -155,9 +152,9 @@ public class ObjectDetector : MonoBehaviour
                     break;
                 case 2:
                     print("[ObjectDetector] Rendering detections.");
-                    if (objectRenderer)
+                    if (_objectRenderer)
                     {
-                        objectRenderer.RenderDetections(
+                        _objectRenderer.RenderDetections(
                             coordsOutput, 
                             labelIDsOutput
                         );
@@ -177,8 +174,7 @@ public class ObjectDetector : MonoBehaviour
 
     private bool TryEnsureCameraTexture()
     {
-        cameraAccess = ResolveCameraAccess(cameraAccess);
-        if (!cameraAccess || !cameraAccess.IsPlaying)
+        if (!_cameraAccess || !_cameraAccess.IsPlaying)
         {
             return false;
         }
@@ -188,10 +184,10 @@ public class ObjectDetector : MonoBehaviour
             return true;
         }
 
-        _cameraTexture = cameraAccess.GetTexture();
+        _cameraTexture = _cameraAccess.GetTexture();
         if (_cameraTexture)
         {
-            var resolution = cameraAccess.CurrentResolution;
+            var resolution = _cameraAccess.CurrentResolution;
             print($"[ObjectDetector] Passthrough texture ready: {resolution.x}x{resolution.y}");
         }
         else
@@ -199,15 +195,6 @@ public class ObjectDetector : MonoBehaviour
             Debug.LogWarning("[ObjectDetector] Passthrough texture not available yet.");
         }
 
-        return _cameraTexture != null;
-    }
-
-    private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
-    {
-        if (configuredAccess)
-        {
-            return configuredAccess;
-        }
-        return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
+        return _cameraTexture;
     }
 }

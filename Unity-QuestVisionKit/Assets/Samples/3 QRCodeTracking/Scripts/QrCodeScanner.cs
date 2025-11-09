@@ -1,9 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Meta.XR;
-using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine;
+using Meta.XR;
+using System;
 #if ZXING_ENABLED
 using ZXing;
 using ZXing.Common;
@@ -23,7 +23,7 @@ public class QrCodeResult
     public string text;
     public Vector3[] corners;
     public Pose cameraPose;
-    public PassthroughCameraAccess.CameraIntrinsics intrinsics;
+    public PassthroughCameraAccess.CameraIntrinsics Intrinsics;
     public Vector2Int captureResolution;
 }
 
@@ -32,10 +32,10 @@ public class QrCodeScanner : MonoBehaviour
 #if ZXING_ENABLED
     [SerializeField] private int sampleFactor = 2;
     [SerializeField] private QrCodeDetectionMode detectionMode = QrCodeDetectionMode.Single;
-    [SerializeField] private ComputeShader downsampleShader;
-    [SerializeField] private PassthroughCameraAccess cameraAccess;
 
+    private PassthroughCameraAccess _cameraAccess;
     private RenderTexture _downsampledTexture;
+    private ComputeShader _downsampleShader;
     private QRCodeReader _qrReader;
     private bool _isScanning;
     
@@ -46,124 +46,62 @@ public class QrCodeScanner : MonoBehaviour
     private static readonly int OutputWidth = Shader.PropertyToID("_OutputWidth");
     private static readonly int OutputHeight = Shader.PropertyToID("_OutputHeight");
 
+    private struct CaptureFrame
+    {
+        public Texture Texture;
+        public Pose Pose;
+        public PassthroughCameraAccess.CameraIntrinsics Intrinsics;
+        public Vector2Int Resolution;
+    }
+
     private void Awake()
     {
-        cameraAccess = ResolveCameraAccess(cameraAccess);
+        _cameraAccess = GetComponent<PassthroughCameraAccess>();
+        
+        _downsampleShader = Resources.Load<ComputeShader>($"Downsample");
+        if (_downsampleShader == null)
+        {
+            Debug.LogError("Downsample.compute not found in a Resources folder.");
+        }
+        
         _qrReader = new QRCodeReader();
     }
 
     private void OnDestroy()
     {
-        if (_downsampledTexture != null)
-        {
-            _downsampledTexture.Release();
-            Destroy(_downsampledTexture);
-        }
+        if (_downsampledTexture == null) return;
+        _downsampledTexture.Release();
+        Destroy(_downsampledTexture);
     }
 
     public async Task<QrCodeResult[]> ScanFrameAsync()
     {
-        if (_isScanning)
-            return null;
+        if (_isScanning || !_downsampleShader) return Array.Empty<QrCodeResult>();
 
         _isScanning = true;
         try
         {
-            while (true)
+            var frame = await AcquireFrameAsync();
+            if (frame == null)
             {
-                cameraAccess = ResolveCameraAccess(cameraAccess);
-                if (cameraAccess && cameraAccess.IsPlaying)
-                {
-                    break;
-                }
-                await Task.Delay(16);
+                return Array.Empty<QrCodeResult>();
             }
 
-            if (cameraAccess == null)
+            var (targetWidth, targetHeight) = GetTargetDimensions(frame.Value.Texture);
+            if (!EnsureDownsampleTarget(targetWidth, targetHeight))
             {
-                Debug.LogWarning("[QRCodeScanner] Passthrough camera is unavailable.");
-                return null;
+                return Array.Empty<QrCodeResult>();
             }
 
-            var cameraTexture = cameraAccess.GetTexture() as Texture2D;
-            if (!cameraTexture)
-            {
-                Debug.LogWarning("[QRCodeScanner] Passthrough camera texture is not a Texture2D.");
-                return null;
-            }
-
-            var capturePose = cameraAccess.GetCameraPose();
-            var captureIntrinsics = cameraAccess.Intrinsics;
-            var captureResolution = cameraAccess.CurrentResolution;
-
-            var originalWidth = cameraTexture.width;
-            var originalHeight = cameraTexture.height;
-            var targetWidth = Mathf.Max(1, originalWidth / sampleFactor);
-            var targetHeight = Mathf.Max(1, originalHeight / sampleFactor);
-
-            if (!_downsampledTexture || _downsampledTexture.width != targetWidth || _downsampledTexture.height != targetHeight)
-            {
-                if (_downsampledTexture)
-                {
-                    _downsampledTexture.Release();
-                }
-
-                _downsampledTexture = new RenderTexture(targetWidth, targetHeight, 0, RenderTextureFormat.R8)
-                {
-                    enableRandomWrite = true
-                };
-                
-                _downsampledTexture.Create();
-            }
-
-            var kernel = downsampleShader.FindKernel("CSMain");
-            downsampleShader.SetTexture(kernel, Input1, cameraTexture);
-            downsampleShader.SetTexture(kernel, Output, _downsampledTexture);
-            downsampleShader.SetInt(InputWidth, originalWidth);
-            downsampleShader.SetInt(InputHeight, originalHeight);
-            downsampleShader.SetInt(OutputWidth, targetWidth);
-            downsampleShader.SetInt(OutputHeight, targetHeight);
-
-            var threadGroupsX = Mathf.CeilToInt(targetWidth / 8f);
-            var threadGroupsY = Mathf.CeilToInt(targetHeight / 8f);
-            downsampleShader.Dispatch(kernel, threadGroupsX, threadGroupsY, 1);
-
+            DispatchDownsample(frame.Value.Texture, targetWidth, targetHeight);
             var grayBytes = await ReadPixelsAsync(_downsampledTexture);
-            var luminanceSource = new RGBLuminanceSource(grayBytes, targetWidth, targetHeight, RGBLuminanceSource.BitmapFormat.Gray8);
-            var binaryBitmap = new BinaryBitmap(new HybridBinarizer(luminanceSource));
-
-            return await Task.Run(() =>
+            if (grayBytes == null || grayBytes.Length == 0)
             {
-                try
-                {
-                    if (detectionMode == QrCodeDetectionMode.Single)
-                    {
-                        var decodeResult = _qrReader.decode(binaryBitmap);
-                        if (decodeResult != null)
-                            return new[] { ProcessDecodeResult(decodeResult, targetWidth, targetHeight, capturePose, captureIntrinsics, captureResolution) };
-                    }
-                    else
-                    {
-                        var multiReader = new GenericMultipleBarcodeReader(_qrReader);
-                        var decodeResults = multiReader.decodeMultiple(binaryBitmap);
-                        if (decodeResults != null)
-                        {
-                            var results = new List<QrCodeResult>();
-                            foreach (var decodeResult in decodeResults)
-                            {
-                                results.Add(ProcessDecodeResult(decodeResult, targetWidth, targetHeight, capturePose, captureIntrinsics, captureResolution));
-                            }
+                return Array.Empty<QrCodeResult>();
+            }
 
-                            return results.ToArray();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"[QRCodeScanner] Error decoding QR code(s): {ex.Message}");
-                }
-                return null;
-            });
+            var decoded = await Task.Run(() => DecodeFrame(frame.Value, grayBytes, targetWidth, targetHeight));
+            return decoded ?? Array.Empty<QrCodeResult>();
         }
         finally
         {
@@ -171,7 +109,7 @@ public class QrCodeScanner : MonoBehaviour
         }
     }
 
-    private QrCodeResult ProcessDecodeResult(Result decodeResult, int targetWidth, int targetHeight, Pose capturePose, PassthroughCameraAccess.CameraIntrinsics captureIntrinsics, Vector2Int captureResolution)
+    private QrCodeResult ProcessDecodeResult(Result decodeResult, int targetWidth, int targetHeight, CaptureFrame frame)
     {
         var points = decodeResult.ResultPoints;
         var uvCorners = new Vector3[points.Length];
@@ -184,9 +122,9 @@ public class QrCodeScanner : MonoBehaviour
         {
             text = decodeResult.Text,
             corners = uvCorners,
-            cameraPose = capturePose,
-            intrinsics = captureIntrinsics,
-            captureResolution = captureResolution
+            cameraPose = frame.Pose,
+            Intrinsics = frame.Intrinsics,
+            captureResolution = frame.Resolution
         };
     }
 
@@ -207,15 +145,106 @@ public class QrCodeScanner : MonoBehaviour
         });
         return tcs.Task;
     }
-#endif
 
-    private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
+    private async Task<CaptureFrame?> AcquireFrameAsync()
     {
-        if (configuredAccess)
+        while (true)
         {
-            return configuredAccess;
+            if (_cameraAccess && _cameraAccess.IsPlaying)
+            {
+                var texture = _cameraAccess.GetTexture();
+                if (texture)
+                {
+                    return new CaptureFrame
+                    {
+                        Texture = texture,
+                        Pose = _cameraAccess.GetCameraPose(),
+                        Intrinsics = _cameraAccess.Intrinsics,
+                        Resolution = _cameraAccess.CurrentResolution
+                    };
+                }
+            }
+            await Task.Delay(16);
+        }
+    }
+
+    private (int width, int height) GetTargetDimensions(Texture texture)
+    {
+        var divisor = Mathf.Max(1, sampleFactor);
+        return (Mathf.Max(1, texture.width / divisor), Mathf.Max(1, texture.height / divisor));
+    }
+
+    private bool EnsureDownsampleTarget(int width, int height)
+    {
+        if (_downsampledTexture && _downsampledTexture.width == width && _downsampledTexture.height == height)
+        {
+            return true;
         }
 
-        return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
+        if (_downsampledTexture)
+        {
+            _downsampledTexture.Release();
+        }
+
+        _downsampledTexture = new RenderTexture(width, height, 0, RenderTextureFormat.R8)
+        {
+            enableRandomWrite = true
+        };
+        _downsampledTexture.Create();
+        return true;
     }
+
+    private void DispatchDownsample(Texture source, int targetWidth, int targetHeight)
+    {
+        var kernel = _downsampleShader.FindKernel("CSMain");
+        _downsampleShader.SetTexture(kernel, Input1, source);
+        _downsampleShader.SetTexture(kernel, Output, _downsampledTexture);
+        _downsampleShader.SetInt(InputWidth, source.width);
+        _downsampleShader.SetInt(InputHeight, source.height);
+        _downsampleShader.SetInt(OutputWidth, targetWidth);
+        _downsampleShader.SetInt(OutputHeight, targetHeight);
+
+        var threadGroupsX = Mathf.CeilToInt(targetWidth / 8f);
+        var threadGroupsY = Mathf.CeilToInt(targetHeight / 8f);
+        _downsampleShader.Dispatch(kernel, threadGroupsX, threadGroupsY, 1);
+    }
+
+    private QrCodeResult[] DecodeFrame(CaptureFrame frame, byte[] grayBytes, int targetWidth, int targetHeight)
+    {
+        try
+        {
+            var luminanceSource = new RGBLuminanceSource(grayBytes, targetWidth, targetHeight, RGBLuminanceSource.BitmapFormat.Gray8);
+            var binaryBitmap = new BinaryBitmap(new HybridBinarizer(luminanceSource));
+
+            if (detectionMode == QrCodeDetectionMode.Single)
+            {
+                var decodeResult = _qrReader.decode(binaryBitmap);
+                if (decodeResult != null)
+                {
+                    return new[] { ProcessDecodeResult(decodeResult, targetWidth, targetHeight, frame) };
+                }
+            }
+            else
+            {
+                var multiReader = new GenericMultipleBarcodeReader(_qrReader);
+                var decodeResults = multiReader.decodeMultiple(binaryBitmap);
+                if (decodeResults != null)
+                {
+                    var results = new List<QrCodeResult>(decodeResults.Length);
+                    foreach (var decodeResult in decodeResults)
+                    {
+                        results.Add(ProcessDecodeResult(decodeResult, targetWidth, targetHeight, frame));
+                    }
+                    return results.ToArray();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[QRCodeScanner] Error decoding QR code(s): {ex.Message}");
+        }
+
+        return Array.Empty<QrCodeResult>();
+    }
+#endif
 }

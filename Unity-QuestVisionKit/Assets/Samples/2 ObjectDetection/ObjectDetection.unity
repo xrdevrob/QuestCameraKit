@@ -1364,13 +1364,13 @@ GameObject:
   - component: {fileID: 2003488193}
   - component: {fileID: 2003488192}
   - component: {fileID: 2003488191}
+  - component: {fileID: 2003488196}
+  - component: {fileID: 2003488198}
   - component: {fileID: 2003488194}
   - component: {fileID: 2003488195}
-  - component: {fileID: 2003488196}
   - component: {fileID: 2003488197}
-  - component: {fileID: 2003488198}
   m_Layer: 0
-  m_Name: Object Detection Sample
+  m_Name: Object Detection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1388,11 +1388,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 311152bad71ab4a5c9814f979281e2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraAccess: {fileID: 2003488198}
-  envRaycastManager: {fileID: 2003488194}
   mergeThreshold: 0.2
-  markerPrefab: {fileID: 6669015522134640172, guid: b35cf966a40234174ba3e922a31b399c, type: 3}
-  labelFilters: 3f000000000000003e00000042000000
+  markerPrefab: {fileID: 7985637374133528724, guid: f607a6951ee6b47e69cbb77c038044d6, type: 3}
+  labelFilters: 
 --- !u!114 &2003488192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1409,8 +1407,6 @@ MonoBehaviour:
   backend: 512
   inferenceInterval: 0.1
   kLayersPerFrame: 20
-  cameraAccess: {fileID: 2003488198}
-  objectRenderer: {fileID: 2003488191}
 --- !u!4 &2003488193
 Transform:
   m_ObjectHideFlags: 0
@@ -1464,10 +1460,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2003488189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4656ffde2953d425ca020284c599cf24, type: 3}
+  m_Script: {fileID: 11500000, guid: 09420e86413e14ef6a1192b572643886, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  markerPrefab: {fileID: 6669015522134640172, guid: b35cf966a40234174ba3e922a31b399c, type: 3}
+  markerPrefab: {fileID: 7985637374133528724, guid: f607a6951ee6b47e69cbb77c038044d6, type: 3}
   poolSize: 4
 --- !u!114 &2003488197
 MonoBehaviour:
