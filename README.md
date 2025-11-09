@@ -8,48 +8,197 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 - [Update Notes](#update-notes)
 - [Getting Started with PCA](#getting-started-with-pca)
 - [Running the Samples](#running-the-samples)
-- [General Troubleshooting & Known Issues](#general-troubleshooting--known-issues)
+- [Troubleshooting & Known Issues](#troubleshooting--known-issues)
 - [Community Contributions](#community-contributions)
 - [News](#news)
 - [Acknowledgements & Credits](#acknowledgements--credits)
 - [License](#license)
 - [Contact](#contact)
 
-# Overview
+# PCA Samples
 
 ## 1. 🎨 Color Picker
 
 - **Purpose:** Convert a 3D point in space to its corresponding 2D image pixel.
 - **Description:** This sample shows the mapping between 3D space and 2D image coordinates using the Passthrough Camera API. We use MRUK's EnvironmentRaycastManager to determine a 3D point in our environment and map it to the location on our WebcamTexture. We then extract the pixel on that point, to determine the color of a real world object.
 
+<details>
+<summary>How to run this sample</summary>
+
+- Open the `ColorPicker` scene.
+- Build the scene and run the APK on your headset.
+- Aim the ray onto a surface in your real space and press the A button or pinch your fingers to observe the cube changing its color to the color in your real environment.
+
+</details>
+
+![Color Picker](Media/ColorPicker_Environment.gif)
+
 ## 2. 🍎 Object Detection with Unity Sentis
 
 - **Purpose:** Convert 2D screen coordinates into their corresponding 3D points in space.
 - **Description:** Use the Unity Sentis framework to infer different ML models to detect and track objects. Learn how to convert detected image coordinates (e.g. bounding boxes) back into 3D points for dynamic interaction within your scenes. In this sample you will also see how to filter labels. This means e.g. you can only detect humans and pets, to create a more safe play-area for your VR game. The sample video below is filtered to monitor, person and laptop. The sample is running at around `60 fps`.
 
-| 1. 🎨 Color Picker                          | 2. 🍎 Object Detection                      |
-|---------------------------------------------|---------------------------------------------|
-| ![CPE](Media/ColorPicker_Environment.gif)   | ![OBJD](Media/ObjectDetection.gif)          |
+<details>
+<summary>How to run this sample</summary>
+
+- Open the `ObjectDetection` scene.
+- Install [Unity Sentis](https://docs.unity3d.com/Packages/com.unity.sentis@2.1/manual/get-started.html) (tested with `com.unity.sentis@2.1.2`).
+- Select the labels you want to track. Leaving the list empty tracks all objects. <details>
+  <summary>Show all available labels</summary>
+  <table>
+    <tr><td>person</td><td>bicycle</td><td>car</td><td>motorbike</td><td>aeroplane</td><td>bus</td><td>train</td><td>truck</td></tr>
+    <tr><td>boat</td><td>traffic light</td><td>fire hydrant</td><td>stop sign</td><td>parking meter</td><td>bench</td><td>bird</td><td>cat</td></tr>
+    <tr><td>dog</td><td>horse</td><td>sheep</td><td>cow</td><td>elephant</td><td>bear</td><td>zebra</td><td>giraffe</td></tr>
+    <tr><td>backpack</td><td>umbrella</td><td>handbag</td><td>tie</td><td>suitcase</td><td>frisbee</td><td>skis</td><td>snowboard</td></tr>
+    <tr><td>sports ball</td><td>kite</td><td>baseball bat</td><td>baseball glove</td><td>skateboard</td><td>surfboard</td><td>tennis racket</td><td>bottle</td></tr>
+    <tr><td>wine glass</td><td>cup</td><td>fork</td><td>knife</td><td>spoon</td><td>bowl</td><td>banana</td><td>apple</td></tr>
+    <tr><td>sandwich</td><td>orange</td><td>broccoli</td><td>carrot</td><td>hot dog</td><td>pizza</td><td>donut</td><td>cake</td></tr>
+    <tr><td>chair</td><td>sofa</td><td>pottedplant</td><td>bed</td><td>diningtable</td><td>toilet</td><td>tvmonitor</td><td>laptop</td></tr>
+    <tr><td>mouse</td><td>remote</td><td>keyboard</td><td>cell phone</td><td>microwave</td><td>oven</td><td>toaster</td><td>sink</td></tr>
+    <tr><td>refrigerator</td><td>book</td><td>clock</td><td>vase</td><td>scissors</td><td>teddy bear</td><td>hair drier</td><td>toothbrush</td></tr>
+  </table>
+  </details>
+- Build and deploy to Quest. Use the trigger to scan the environment; markers will appear for detections above the configured confidence threshold.
+
+</details>
+
+![Object Detection](Media/ObjectDetection.gif)
 
 ## 3. 📱 QR Code Tracking with ZXing
 
 - **Purpose:** Detect and track QR codes in real time. Open webviews or log-in to 3rd party services with ease.
 - **Description:** Similarly to the object detection sample, get QR code coordinated and projects them into 3D space. Detect QR codes and call their URLs. You can select between a multiple or single QR code mode. The sample is running at around `70 fps` for multiple QR codes and a stable `72 fps` for a single code. Users are able to choose between CenterOnly and PerCorner raycasting modes via an enum in the inspector. This enables more accurate rotation tracking for use cases that require it (PerCorner), while preserving a faster fallback (CenterOnly).
 
+<details>
+<summary>How to run this sample</summary>
+
+- Open the `QRCodeTracking` scene.
+- Ensure ZXing DLLs are present (the editor script auto-adds the `ZXING_ENABLED` define).
+- Choose Single or Multiple detection mode and the raycast mode (CenterOnly vs PerCorner).
+- Build to Quest, point the headset toward QR codes, and interact with the spawned markers.
+
+</details>
+
+![QR Code Tracking](Media/QRCodeTracking.gif)
 
 ## 4. 🪟 Shader Samples
 
 - **Purpose:** Apply a custom shader effect to virtual surfaces.
 - **Description:** A shader which takes our camera feed as input to manipulate the content behind it. Right now the project contains a Pixelate, Refract, Water, Zoom, Blur, GameBoy Green and VirtualBoy Red effect. Additionally examples for colorblindness red, green, blue and total have been added (Protanopia, Deuteranopia, Tritanopia, Achromatopsia). Frosted Glass shader is work in progress!
 
-| 3. 📱 QR Code Tracking                | 4. 🪟 Shader Samples                  |
-|---------------------------------------|---------------------------------------|
-| ![QR Code](Media/QRCodeTracking.gif)  | ![Frosted](Media/ShaderSamples.gif)   |
+<details>
+<summary>How to run this sample</summary>
+
+- Open the `Shader Samples` scene or the WIP Frosted Glass scene.
+- Ensure the shared PCA prefab is present in the scene root.
+- Toggle the different shader GameObjects to see Pixelate, Water, Zoom, Blur, GameBoy, VirtualBoy, and colorblindness filters mapped onto PCA textures.
+
+</details>
+
+![Shader Samples](Media/ShaderSamples.gif)
 
 ## 5. 🧠 OpenAI vision model
 
 - **Purpose:** Ask OpenAI's vision model (or any other multi-modal LLM) for context of your current scene.
 - **Description:** We use a the OpenAI Speech to text API to create a command. We then send this command together with a screenshot to the Vision model. Lastly, we get the response back and use the Text to speech API to turn the response text into an audio file in Unity to speak the response. The user can select different speakers, models, and speed. For the command we can add additional instructions for the model, as well as select an image, image & text, or just a text mode. The whole loop takes anywhere from `2-6 seconds`, depending on the internet connection.
+
+<details>
+<summary>How to run this sample</summary>
+
+- Open the **ImageLLM** scene.
+- Create an [OpenAI API key](https://platform.openai.com/api-keys) and enter it on the **OpenAI Manager** prefab.
+- Select your desired model and optionally give the LLM additional instructions.
+- Ensure your Quest headset is connected to a fast/stable network.
+- Build the scene and run the APK on your headset.
+- Use the voice input (controller or hand gesture) to issue commands; the headset captures a PCA frame and plays back the LLM response via TTS.
+
+> [!NOTE]
+> File uploads are currently limited to **25 MB** and the following input formats are supported: `mp3`, `mp4`, `mpeg`, `mpga`, `m4a`, `wav`, `webm`.
+
+You can send commands and receive results in any of these languages:
+
+<details>
+  <summary>Show all supported languages</summary>
+  <table>
+    <tr>
+      <td>Afrikaans</td>
+      <td>Arabic</td>
+      <td>Armenian</td>
+      <td>Azerbaijani</td>
+      <td>Belarusian</td>
+      <td>Bosnian</td>
+      <td>Bulgarian</td>
+      <td>Catalan</td>
+      <td>Chinese</td>
+    </tr>
+    <tr>
+      <td>Croatian</td>
+      <td>Czech</td>
+      <td>Danish</td>
+      <td>Dutch</td>
+      <td>English</td>
+      <td>Estonian</td>
+      <td>Finnish</td>
+      <td>French</td>
+      <td>Galician</td>
+    </tr>
+    <tr>
+      <td>German</td>
+      <td>Greek</td>
+      <td>Hebrew</td>
+      <td>Hindi</td>
+      <td>Hungarian</td>
+      <td>Icelandic</td>
+      <td>Indonesian</td>
+      <td>Italian</td>
+      <td>Japanese</td>
+    </tr>
+    <tr>
+      <td>Kannada</td>
+      <td>Kazakh</td>
+      <td>Korean</td>
+      <td>Latvian</td>
+      <td>Lithuanian</td>
+      <td>Macedonian</td>
+      <td>Malay</td>
+      <td>Marathi</td>
+      <td>Maori</td>
+    </tr>
+    <tr>
+      <td>Nepali</td>
+      <td>Norwegian</td>
+      <td>Persian</td>
+      <td>Polish</td>
+      <td>Portuguese</td>
+      <td>Romanian</td>
+      <td>Russian</td>
+      <td>Serbian</td>
+      <td>Slovak</td>
+    </tr>
+    <tr>
+      <td>Slovenian</td>
+      <td>Spanish</td>
+      <td>Swahili</td>
+      <td>Swedish</td>
+      <td>Tagalog</td>
+      <td>Tamil</td>
+      <td>Thai</td>
+      <td>Turkish</td>
+      <td>Ukrainian</td>
+    </tr>
+    <tr>
+      <td>Urdu</td>
+      <td>Vietnamese</td>
+      <td>Welsh</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </table>
+</details>
 
 https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
@@ -58,14 +207,51 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 - **Purpose:** Stream the Passthrough Camera stream over WebRTC to another client using WebSockets.
 - **Description:** This sample uses [SimpleWebRTC](https://assetstore.unity.com/packages/tools/network/simplewebrtc-309727), which is a Unity-based WebRTC wrapper that facilitates peer-to-peer audio, video, and data communication over WebRTC using [Unitys WebRTC package](https://docs.unity3d.com/Packages/com.unity.webrtc@3.0/manual/index.html). It leverages [NativeWebSocket](https://github.com/endel/NativeWebSocket) for signaling and supports both video and audio streaming. You will need to setup your own websocket signaling server beforehand, either online or in LAN. You can find more information about the necessary steps [here](https://www.youtube.com/watch?v=-CwJTgt_Z3M)
 
+<details>
+<summary>How to run this sample</summary>
+
+- In **Package Manager**, click the **+** button → **Add package from git URL** and install, in order:
+  1. `https://github.com/endel/NativeWebSocket.git#upm`
+  2. `https://github.com/Unity-Technologies/com.unity.webrtc.git`
+  3. `https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC`
+- Open the **WebRTC-Quest** scene.
+- On `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection`, set your WebSocket signaling server address (LAN or cloud).
+- Build and deploy **WebRTC-Quest** to your Quest 3.
+- Open the **WebRTC-SingleClient** scene in the editor (or deploy to another device) to act as the receiving peer.
+- Launch both apps. Perform the **Start** gesture with your left hand (or press the menu button) on Quest to begin streaming.
+
+**Troubleshooting**
+
+- If you hit compiler errors, re-add the three git packages listed above.
+- Use **Tools ▸ Update WebRTC Define Symbol** after importing packages.
+- Ensure your own WebSocket signaling server is running (tutorial [here](https://www.youtube.com/watch?v=-CwJTgt_Z3M)).
+- For LAN streaming, leave the STUN address empty; otherwise keep the default.
+- Enable the **Web Socket Connection active** toggle so Quest connects on start.
+- WebRTC works with Vulkan and OpenGLES3. If you use GLES3:
+  - In *Project Settings ▸ XR Plug-in Management ▸ Oculus*: disable **Low Overhead Mode (GLES)**.
+  - In *XR Plug-in Management ▸ OpenXR*: disable **Meta Quest: Occlusion** and **Meta XR Subsampled Layout**.
+- Ignore PST warnings about opaque textures / low overhead / camera stack for this sample.
+
+</details>
+
+![PCA WebRTC](Media/PCA_WebRTC.gif)
+
 ## 7. 📅 Experimental QR Code detection
 
 - **Purpose:** Detect and track QRCodes without having to use a third-party library.
 - **Description:** As this feature is still in experimental state, make sure to use experimental mode on your Quest3 when testing. Unity usually asks for enabling that, before building. You can activate it via command line command using Meta Quest Hub too. More information can be found here - [MR Utility Kit QRCode Detection](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection) and here - [Mobile Experimental Features](https://developers.meta.com/horizon/documentation/native/android/mobile-experimental-features/)
 
-| 6. 🎥 WebRTC video streaming | 7. 📅 Experimental QRCode detection |
-|------------------------------|------------------------------------|
-| <img src="Media/PCA_WebRTC.gif" width="500"/> | <img src="Media/QrCodeDetection.png" width="500"/> |
+<details>
+<summary>How to run this sample</summary>
+
+- Install **TextMeshPro Essentials** if prompted.
+- Enable Experimental Mode on your Quest 3/3S (headset UI or Quest Hub CLI).
+- Open the **QRCodeDetection** scene.
+- Build and deploy to your device, then use the controllers to interact with the UI (hand tracking is not yet supported).
+
+</details>
+
+![Shader Samples](Media/QrCodeDetection.png)
 
 # Update Notes
 
@@ -109,298 +295,7 @@ Launch Unity and open the cloned project folder.
 3. **Configure Dependencies:**
 Follow the instructions in the section below to run one of the samples.
 
-# Running the Samples
-
-## 1. **[Color Picker](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-color-picker)**
-- Open the `ColorPicker` scene.
-- Build the scene and run the APK on your headset.
-- Aim the ray onto a surface in your real space and press the A button or pinch your fingers to observe the cube changing it's color to the color in your real environment.
-
-## 2. **[Object Detection with Unity Sentis](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-object-detection-with-unity-sentis)**
-- Open the `ObjectDetection` scene.
-- You will need [Unity Sentis](https://docs.unity3d.com/Packages/com.unity.sentis@2.1/manual/get-started.html) for this project to run (com.unity.sentis@2.1.2).
-- Select the labels you would like to track. No label means all objects will be tracked. <details>
-  <summary>Show all available labels</summary>
-  <table>
-    <tr>
-      <td>person</td>
-      <td>bicycle</td>
-      <td>car</td>
-      <td>motorbike</td>
-      <td>aeroplane</td>
-      <td>bus</td>
-      <td>train</td>
-      <td>truck</td>
-    </tr>
-    <tr>
-      <td>boat</td>
-      <td>traffic light</td>
-      <td>fire hydrant</td>
-      <td>stop sign</td>
-      <td>parking meter</td>
-      <td>bench</td>
-      <td>bird</td>
-      <td>cat</td>
-    </tr>
-    <tr>
-      <td>dog</td>
-      <td>horse</td>
-      <td>sheep</td>
-      <td>cow</td>
-      <td>elephant</td>
-      <td>bear</td>
-      <td>zebra</td>
-      <td>giraffe</td>
-    </tr>
-    <tr>
-      <td>backpack</td>
-      <td>umbrella</td>
-      <td>handbag</td>
-      <td>tie</td>
-      <td>suitcase</td>
-      <td>frisbee</td>
-      <td>skis</td>
-      <td>snowboard</td>
-    </tr>
-    <tr>
-      <td>sports ball</td>
-      <td>kite</td>
-      <td>baseball bat</td>
-      <td>baseball glove</td>
-      <td>skateboard</td>
-      <td>surfboard</td>
-      <td>tennis racket</td>
-      <td>bottle</td>
-    </tr>
-    <tr>
-      <td>wine glass</td>
-      <td>cup</td>
-      <td>fork</td>
-      <td>knife</td>
-      <td>spoon</td>
-      <td>bowl</td>
-      <td>banana</td>
-      <td>apple</td>
-    </tr>
-    <tr>
-      <td>sandwich</td>
-      <td>orange</td>
-      <td>broccoli</td>
-      <td>carrot</td>
-      <td>hot dog</td>
-      <td>pizza</td>
-      <td>donut</td>
-      <td>cake</td>
-    </tr>
-    <tr>
-      <td>chair</td>
-      <td>sofa</td>
-      <td>pottedplant</td>
-      <td>bed</td>
-      <td>diningtable</td>
-      <td>toilet</td>
-      <td>tvmonitor</td>
-      <td>laptop</td>
-    </tr>
-    <tr>
-      <td>mouse</td>
-      <td>remote</td>
-      <td>keyboard</td>
-      <td>cell phone</td>
-      <td>microwave</td>
-      <td>oven</td>
-      <td>toaster</td>
-      <td>sink</td>
-    </tr>
-    <tr>
-      <td>refrigerator</td>
-      <td>book</td>
-      <td>clock</td>
-      <td>vase</td>
-      <td>scissors</td>
-      <td>teddy bear</td>
-      <td>hair drier</td>
-      <td>toothbrush</td>
-    </tr>
-  </table>
-</details>
-
-- Build the scene and run the APK on your headset. Look around your room and see how tracked objects receive a bounding box in accurate 3D space.
-
-## 3. **[QR Code Tracking](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-qr-code-tracking-with-zxing)**
-- Open the `QRCodeTracking` scene to test real-time QR code detection and tracking.
-- Install [NuGet for Unity](https://github.com/GlitchEnzo/NuGetForUnity)
-- Click on the `NuGet` menu and then on `Manage NuGet Packages`. Search for the [ZXing.Net package](https://github.com/micjahn/ZXing.Net/) from Michael Jahn and install it.
-- Make sure in your `Player Settings` under `Scripting Define Symbols` you see `ZXING_ENABLED`. The ZXingDefineSymbolChecker class should automatically detect if `ZXing.Net` is installed and add the symbol.
-- In order to see the label of your QR code, you will also need to install TextMeshPro!
-- Build the scene and run the APK on your headset. Look at a QR code to see the marker in 3D space and URL of the QR code.
-
-## 4. **[Shader Samples](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#shader-samples)**
-- Open the `Shader Samples` scene.
-- Build the scene and run the APK on your headset.
-- Look at the spheres from different angles and observe how objects behind it are changing.
-- You can grab the examples too and move them around.
-
-> [!WARNING]  
-> The Meta Project Setup Tool (PST) will show a warning (opaque textures) and tell you to uncheck it, so do not fix this warning.
-
-## 5. **[OpenAI vision model & voice commands](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-openai-vision-model)**
-- Open the `ImageLLM` scene.
-- Make sure to create an [API key](https://platform.openai.com/api-keys) and enter it in the `OpenAI Manager prefab`.
-- Select your desired model and optionally give the LLM some instructions.
-- Make sure your headset is connected to the internet (the faster the better).
-- Build the scene and run the APK on your headset.
-
-> [!NOTE]  
-> File uploads are currently limited to `25 MB` and the following input file types are supported: `mp3`, `mp4`, `mpeg`, `mpga`, `m4a`, `wav`, and `webm`.
-
-You can send commands and receive results in any of these languages:
-<details>
-  <summary>Show all suppported languages</summary>
-<table>
-  <tr>
-    <td>Afrikaans</td>
-    <td>Arabic</td>
-    <td>Armenian</td>
-    <td>Azerbaijani</td>
-    <td>Belarusian</td>
-    <td>Bosnian</td>
-    <td>Bulgarian</td>
-    <td>Catalan</td>
-    <td>Chinese</td>
-  </tr>
-  <tr>
-    <td>Croatian</td>
-    <td>Czech</td>
-    <td>Danish</td>
-    <td>Dutch</td>
-    <td>English</td>
-    <td>Estonian</td>
-    <td>Finnish</td>
-    <td>French</td>
-    <td>Galician</td>
-  </tr>
-  <tr>
-    <td>German</td>
-    <td>Greek</td>
-    <td>Hebrew</td>
-    <td>Hindi</td>
-    <td>Hungarian</td>
-    <td>Icelandic</td>
-    <td>Indonesian</td>
-    <td>Italian</td>
-    <td>Japanese</td>
-  </tr>
-  <tr>
-    <td>Kannada</td>
-    <td>Kazakh</td>
-    <td>Korean</td>
-    <td>Latvian</td>
-    <td>Lithuanian</td>
-    <td>Macedonian</td>
-    <td>Malay</td>
-    <td>Marathi</td>
-    <td>Maori</td>
-  </tr>
-  <tr>
-    <td>Nepali</td>
-    <td>Norwegian</td>
-    <td>Persian</td>
-    <td>Polish</td>
-    <td>Portuguese</td>
-    <td>Romanian</td>
-    <td>Russian</td>
-    <td>Serbian</td>
-    <td>Slovak</td>
-  </tr>
-  <tr>
-    <td>Slovenian</td>
-    <td>Spanish</td>
-    <td>Swahili</td>
-    <td>Swedish</td>
-    <td>Tagalog</td>
-    <td>Tamil</td>
-    <td>Thai</td>
-    <td>Turkish</td>
-    <td>Ukrainian</td>
-  </tr>
-  <tr>
-    <td>Urdu</td>
-    <td>Vietnamese</td>
-    <td>Welsh</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
-</table>
-</details>
-
-## 6. **[WebRTC video streaming](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-webrtc-video-streaming)**
-
-- Open the `Package Manager`, click on the + sign in the upper left/right corner.
-	- Select "Add package from git URL".
-	- Enter URL and click on Install:
-	```
-	https://github.com/endel/NativeWebSocket.git#upm
-	```	
-	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL and click on Install:
-	```
-	https://github.com/Unity-Technologies/com.unity.webrtc.git
-	```
-	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL and click on Install:
-	```
-	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
-	```
-- Open the `WebRTC-Quest` scene.
-- Link up your signaling server on the `Client-STUNConnection` component in the `Web Socket Server Address` field.
-- Build and deploy the `WebRTC-Quest` scene to your Quest3 device.
-- Open the `WebRTC-SingleClient` scene on your Editor.
-- Build and deploy the `WebRTC-SingleClient` scene to another device or start it from within the Unity Editor. More information can be found [here](https://www.youtube.com/watch?v=-CwJTgt_Z3M)
-- Start the WebRTC app on your Quest and on your other devices. Quest and client streaming devices should connect automatically to the websocket signaling server.
-- Perform the Start gesture with your left hand, or press the menu button on your left controller to start streaming from Quest3 to your WebRTC client app.
-
-**Troubleshooting**:
-- If there are compiler errors, make sure all packages were imported correctly.
-	- Open the `Package Manager`, click on the + sign in the upper left/right corner.
-	- Select "Add package from git URL".
-	- Enter URL and click on Install:
-	```
-	https://github.com/endel/NativeWebSocket.git#upm
-	```
-	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL and click on Install:
-	```
-	https://github.com/Unity-Technologies/com.unity.webrtc.git
-	```
-	- After the installation finished, click on the + sign in the upper left/right corner again.
-	- Enter URL and click on Install:
-	```
-	https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC
-	```
-	- Use the menu `Tools/Update WebRTC Define Symbol` to update the scripting define symbols if needed.
-- Make sure your own websocket signaling server is up and running. You can find more information about the necessary steps [here](https://youtu.be/-CwJTgt_Z3M?t=1458).
-- If you're going to stream over LAN, make sure the `STUN Server Address` field on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` is empty, otherwise leave the default value.
-- Make sure to enable the `Web Socket Connection active` flag on `[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor/Client-STUNConnection` to connect to the websocket server automatically on start.
-- WebRTC video streaming **DOES** work, when the **Graphics API** is set to **Vulkan** (as of Unity WebRTC version 3.0.0). It works with **OPENGLES3** too. Make sure to use the right **Graphics API** for your project under `Project Settings/Player`.
-	- When using **OPENGLES3** and **Oculus**: Make sure to **DISABLE** the **Low Overhead Mode (GLES)** setting for Android in `Project Settings/XR Plug-In Management/Oculus`. Otherwise this optimization will prevent your Quest from sending the video stream to a receiving client.
-	- When using **OPENGLES3** and **OpenXR**: Make sure to **DISABLE** the **Meta Quest: Occlusion** and **Meta XR Subsampled Layout** settings for OpenXR in `Project Settings/XR Plug-In Management/OpenXR`. Otherwise this will prevent your Quest app from building, as these features are not supported by OpenGL.
-
-> [!WARNING] 
-> The Meta Project Setup Tool (PST) will show 3 warnings (opaque textures, low overhead mode GLES (-> only when working with **OPENGLES3** and the Oculus package) and camera stack). Do NOT fix this warnings.
-
-## 7. **[Experimental QRCode detection](https://github.com/xrdevrob/QuestCameraKit?tab=readme-ov-file#-experimental-qrcode-detection)**
-
-- Make sure TextMeshPro essentials are installed.
-- Enable experimental mode on your Quest3. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
-- Build and deploy the `QRCodeDetection` scene to your Quest3 device.
-- Use your controllers to interact with the UI. No hand tracking support yet.
-
-# General Troubleshooting & Known Issues
+# Troubleshootingg & Known Issues
 
 - For sample 7 QR Code Detection, make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
 - If switching betwenn Unity 6 and other versions such as 2023 or 2022 it can happen that your Android Manifest is getting modified and the app won't run anymore. Should this happen to you make sure to go to `Meta > Tools > Update AndroidManifest.xml` or `Meta > Tools > Create store-compatible AndroidManifest.xml`. After that make sure you add back the `horizonos.permission.HEADSET_CAMERA` manually into your manifest file.
