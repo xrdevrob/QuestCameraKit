@@ -1,7 +1,7 @@
 using Meta.XR;
+using Unity.Collections;
 using UnityEngine;
 using System.Collections;
-using PassthroughCameraSamples;
 
 public enum SamplingMode
 {
@@ -31,17 +31,17 @@ public class ColorPicker : MonoBehaviour
     private Vector3? _lastHitPoint;
     private Camera _mainCamera;
     private Renderer _manualRenderer;
-    private WebCamTexture _webcamTexture;
-    private WebCamTextureManager _cameraManager;
+    [SerializeField] private PassthroughCameraAccess cameraAccess;
     private EnvironmentRaycastManager _raycastManager;
+    private Vector2Int _cameraResolution;
 
     private void Start()
     {
         _mainCamera = Camera.main;
-        _cameraManager = FindAnyObjectByType<WebCamTextureManager>();
+        cameraAccess = ResolveCameraAccess(cameraAccess);
         _raycastManager = GetComponent<EnvironmentRaycastManager>();
 
-        if (!_mainCamera || !_cameraManager || !_raycastManager ||
+        if (!_mainCamera || !cameraAccess || !_raycastManager ||
             (samplingMode == SamplingMode.Environment && !raySampleOrigin) ||
             (samplingMode == SamplingMode.Manual && !manualSamplingOrigin))
         {
@@ -55,17 +55,25 @@ public class ColorPicker : MonoBehaviour
         }
 
         SetupLineRenderer();
-        StartCoroutine(WaitForWebCam());
+        StartCoroutine(WaitForCameraFeed());
     }
 
-    private IEnumerator WaitForWebCam()
+    private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
     {
-        while (!_cameraManager.WebCamTexture || !_cameraManager.WebCamTexture.isPlaying)
+        if (configuredAccess)
+        {
+            return configuredAccess;
+        }
+        return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
+    }
+
+    private IEnumerator WaitForCameraFeed()
+    {
+        while (cameraAccess && !cameraAccess.IsPlaying)
         {
             yield return null;
         }
-
-        _webcamTexture = _cameraManager.WebCamTexture;
+        _cameraResolution = cameraAccess ? cameraAccess.CurrentResolution : Vector2Int.zero;
     }
 
     private void Update()
@@ -100,14 +108,27 @@ public class ColorPicker : MonoBehaviour
 
     private void PickColor()
     {
-        if (_lastHitPoint == null || !_webcamTexture || !_webcamTexture.isPlaying)
+        if (_lastHitPoint == null || !cameraAccess || !cameraAccess.IsPlaying)
         {
-            Debug.LogWarning("ColorPicker: Invalid sampling point or webcam texture not ready.");
+            Debug.LogWarning("ColorPicker: Invalid sampling point or passthrough feed not ready.");
             return;
         }
 
-        var uv = WorldToTextureUV(_lastHitPoint.Value);
-        var color = SampleAndCorrectColor(uv);
+        _cameraResolution = cameraAccess.CurrentResolution;
+        if (_cameraResolution == Vector2Int.zero || !TryGetPixelCoordinate(_lastHitPoint.Value, out var pixel))
+        {
+            Debug.LogWarning("ColorPicker: Unable to project sampling point onto the camera.");
+            return;
+        }
+
+        var colors = cameraAccess.GetColors();
+        if (!colors.IsCreated)
+        {
+            Debug.LogWarning("ColorPicker: Camera colors not ready.");
+            return;
+        }
+
+        var color = SampleAndCorrectColor(pixel, colors, _cameraResolution);
 
         if (_manualRenderer)
         {
@@ -115,40 +136,30 @@ public class ColorPicker : MonoBehaviour
         }
     }
 
-    private Vector2 WorldToTextureUV(Vector3 worldPoint)
+    private bool TryGetPixelCoordinate(Vector3 worldPoint, out Vector2Int pixel)
     {
-        var cameraPose = PassthroughCameraUtils.GetCameraPoseInWorld(_cameraManager.Eye);
-        var localPoint = Quaternion.Inverse(cameraPose.rotation) * (worldPoint - cameraPose.position);
-        var intrinsics = PassthroughCameraUtils.GetCameraIntrinsics(_cameraManager.Eye);
-
-        if (localPoint.z <= 0.0001f)
+        pixel = default;
+        if (!cameraAccess || !cameraAccess.IsPlaying || _cameraResolution == Vector2Int.zero)
         {
-            Debug.LogWarning("ColorPicker: Point too close.");
-            return Vector2.zero;
+            return false;
         }
 
-        var scaleX = _webcamTexture.width / (float)intrinsics.Resolution.x;
-        var scaleY = _webcamTexture.height / (float)intrinsics.Resolution.y;
+        var viewport = cameraAccess.WorldToViewportPoint(worldPoint);
+        if (viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f)
+        {
+            return false;
+        }
 
-        var uPixel = intrinsics.FocalLength.x * (localPoint.x / localPoint.z) + intrinsics.PrincipalPoint.x;
-        var vPixel = intrinsics.FocalLength.y * (localPoint.y / localPoint.z) + intrinsics.PrincipalPoint.y;
-
-        uPixel *= scaleX;
-        vPixel *= scaleY;
-
-        var u = uPixel / _webcamTexture.width;
-        var v = vPixel / _webcamTexture.height;
-
-        return new Vector2(u, v);
+        pixel = new Vector2Int(
+            Mathf.Clamp(Mathf.RoundToInt(viewport.x * (_cameraResolution.x - 1)), 0, _cameraResolution.x - 1),
+            Mathf.Clamp(Mathf.RoundToInt(viewport.y * (_cameraResolution.y - 1)), 0, _cameraResolution.y - 1));
+        return true;
     }
 
-    private Color SampleAndCorrectColor(Vector2 uv)
+    private Color SampleAndCorrectColor(Vector2Int pixel, NativeArray<Color32> colors, Vector2Int resolution)
     {
-        var x = Mathf.Clamp(Mathf.RoundToInt(uv.x * _webcamTexture.width), 0, _webcamTexture.width - 1);
-        var y = Mathf.Clamp(Mathf.RoundToInt(uv.y * _webcamTexture.height), 0, _webcamTexture.height - 1);
-
-        var sampledColor = _webcamTexture.GetPixel(x, y);
-        var brightness = CalculateRoiBrightness(x, y);
+        var sampledColor = (Color)colors[pixel.y * resolution.x + pixel.x];
+        var brightness = CalculateRoiBrightness(pixel, colors, resolution);
 
         var factor = Mathf.Clamp(targetBrightness / Mathf.Max(brightness, 0.001f), minCorrection, maxCorrection);
         _prevCorrectionFactor = Mathf.Lerp(_prevCorrectionFactor, factor, correctionSmoothing);
@@ -157,7 +168,7 @@ public class ColorPicker : MonoBehaviour
         return new Color(Mathf.Clamp01(corrected.r), Mathf.Clamp01(corrected.g), Mathf.Clamp01(corrected.b), corrected.a);
     }
 
-    private float CalculateRoiBrightness(int x, int y)
+    private float CalculateRoiBrightness(Vector2Int centerPixel, NativeArray<Color32> colors, Vector2Int resolution)
     {
         var sum = 0f;
         var count = 0;
@@ -167,13 +178,13 @@ public class ColorPicker : MonoBehaviour
         {
             for (var j = -half; j <= half; j++)
             {
-                int xi = x + i, yj = y + j;
-                if (xi < 0 || xi >= _webcamTexture.width || yj < 0 || yj >= _webcamTexture.height)
+                int xi = centerPixel.x + i, yj = centerPixel.y + j;
+                if (xi < 0 || xi >= resolution.x || yj < 0 || yj >= resolution.y)
                 {
                     continue;
                 }
 
-                var pixel = _webcamTexture.GetPixel(xi, yj).linear;
+                var pixel = ((Color)colors[yj * resolution.x + xi]).linear;
                 sum += 0.2126f * pixel.r + 0.7152f * pixel.g + 0.0722f * pixel.b;
                 count++;
             }

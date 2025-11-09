@@ -1,9 +1,9 @@
-using System.Collections.Generic;
-using PassthroughCameraSamples;
-using System.Threading.Tasks;
-using UnityEngine.Rendering;
-using UnityEngine;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Meta.XR;
+using UnityEngine;
+using UnityEngine.Rendering;
 #if ZXING_ENABLED
 using ZXing;
 using ZXing.Common;
@@ -22,6 +22,9 @@ public class QrCodeResult
 {
     public string text;
     public Vector3[] corners;
+    public Pose cameraPose;
+    public PassthroughCameraAccess.CameraIntrinsics intrinsics;
+    public Vector2Int captureResolution;
 }
 
 public class QrCodeScanner : MonoBehaviour
@@ -30,10 +33,9 @@ public class QrCodeScanner : MonoBehaviour
     [SerializeField] private int sampleFactor = 2;
     [SerializeField] private QrCodeDetectionMode detectionMode = QrCodeDetectionMode.Single;
     [SerializeField] private ComputeShader downsampleShader;
+    [SerializeField] private PassthroughCameraAccess cameraAccess;
 
-    private WebCamTextureManager _webCamTextureManager;
     private RenderTexture _downsampledTexture;
-    private Texture2D _webcamTextureCache;
     private QRCodeReader _qrReader;
     private bool _isScanning;
     
@@ -46,7 +48,7 @@ public class QrCodeScanner : MonoBehaviour
 
     private void Awake()
     {
-        _webCamTextureManager = FindAnyObjectByType<WebCamTextureManager>();
+        cameraAccess = ResolveCameraAccess(cameraAccess);
         _qrReader = new QRCodeReader();
     }
 
@@ -57,26 +59,6 @@ public class QrCodeScanner : MonoBehaviour
             _downsampledTexture.Release();
             Destroy(_downsampledTexture);
         }
-        if (_webcamTextureCache != null)
-        {
-            Destroy(_webcamTextureCache);
-        }
-    }
-
-    private Texture2D GetOrCreateTexture(int width, int height)
-    {
-        if (_webcamTextureCache && _webcamTextureCache.width == width && _webcamTextureCache.height == height)
-        {
-            return _webcamTextureCache;
-        }
-
-        if (_webcamTextureCache)
-        {
-            Destroy(_webcamTextureCache);
-        }
-        
-        _webcamTextureCache = new Texture2D(width, height, TextureFormat.RGBA32, false);
-        return _webcamTextureCache;
     }
 
     public async Task<QrCodeResult[]> ScanFrameAsync()
@@ -87,25 +69,35 @@ public class QrCodeScanner : MonoBehaviour
         _isScanning = true;
         try
         {
-            if (!_webCamTextureManager)
+            while (true)
             {
-                Debug.LogWarning("[QRCodeScanner] Camera helper is not assigned.");
+                cameraAccess = ResolveCameraAccess(cameraAccess);
+                if (cameraAccess && cameraAccess.IsPlaying)
+                {
+                    break;
+                }
+                await Task.Delay(16);
+            }
+
+            if (cameraAccess == null)
+            {
+                Debug.LogWarning("[QRCodeScanner] Passthrough camera is unavailable.");
                 return null;
             }
 
-            var webCamTex = _webCamTextureManager.WebCamTexture;
-            while (!webCamTex || !webCamTex.isPlaying)
+            var cameraTexture = cameraAccess.GetTexture() as Texture2D;
+            if (!cameraTexture)
             {
-                await Task.Delay(16);
-                webCamTex = _webCamTextureManager.WebCamTexture;
+                Debug.LogWarning("[QRCodeScanner] Passthrough camera texture is not a Texture2D.");
+                return null;
             }
 
-            var texture = GetOrCreateTexture(webCamTex.width, webCamTex.height);
-            texture.SetPixels(webCamTex.GetPixels());
-            texture.Apply();
+            var capturePose = cameraAccess.GetCameraPose();
+            var captureIntrinsics = cameraAccess.Intrinsics;
+            var captureResolution = cameraAccess.CurrentResolution;
 
-            var originalWidth = texture.width;
-            var originalHeight = texture.height;
+            var originalWidth = cameraTexture.width;
+            var originalHeight = cameraTexture.height;
             var targetWidth = Mathf.Max(1, originalWidth / sampleFactor);
             var targetHeight = Mathf.Max(1, originalHeight / sampleFactor);
 
@@ -125,7 +117,7 @@ public class QrCodeScanner : MonoBehaviour
             }
 
             var kernel = downsampleShader.FindKernel("CSMain");
-            downsampleShader.SetTexture(kernel, Input1, texture);
+            downsampleShader.SetTexture(kernel, Input1, cameraTexture);
             downsampleShader.SetTexture(kernel, Output, _downsampledTexture);
             downsampleShader.SetInt(InputWidth, originalWidth);
             downsampleShader.SetInt(InputHeight, originalHeight);
@@ -148,7 +140,7 @@ public class QrCodeScanner : MonoBehaviour
                     {
                         var decodeResult = _qrReader.decode(binaryBitmap);
                         if (decodeResult != null)
-                            return new[] { ProcessDecodeResult(decodeResult, targetWidth, targetHeight) };
+                            return new[] { ProcessDecodeResult(decodeResult, targetWidth, targetHeight, capturePose, captureIntrinsics, captureResolution) };
                     }
                     else
                     {
@@ -159,7 +151,7 @@ public class QrCodeScanner : MonoBehaviour
                             var results = new List<QrCodeResult>();
                             foreach (var decodeResult in decodeResults)
                             {
-                                results.Add(ProcessDecodeResult(decodeResult, targetWidth, targetHeight));
+                                results.Add(ProcessDecodeResult(decodeResult, targetWidth, targetHeight, capturePose, captureIntrinsics, captureResolution));
                             }
 
                             return results.ToArray();
@@ -179,7 +171,7 @@ public class QrCodeScanner : MonoBehaviour
         }
     }
 
-    private QrCodeResult ProcessDecodeResult(Result decodeResult, int targetWidth, int targetHeight)
+    private QrCodeResult ProcessDecodeResult(Result decodeResult, int targetWidth, int targetHeight, Pose capturePose, PassthroughCameraAccess.CameraIntrinsics captureIntrinsics, Vector2Int captureResolution)
     {
         var points = decodeResult.ResultPoints;
         var uvCorners = new Vector3[points.Length];
@@ -191,7 +183,10 @@ public class QrCodeScanner : MonoBehaviour
         return new QrCodeResult
         {
             text = decodeResult.Text,
-            corners = uvCorners
+            corners = uvCorners,
+            cameraPose = capturePose,
+            intrinsics = captureIntrinsics,
+            captureResolution = captureResolution
         };
     }
 
@@ -213,4 +208,14 @@ public class QrCodeScanner : MonoBehaviour
         return tcs.Task;
     }
 #endif
+
+    private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
+    {
+        if (configuredAccess)
+        {
+            return configuredAccess;
+        }
+
+        return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
+    }
 }

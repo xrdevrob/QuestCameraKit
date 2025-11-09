@@ -1,8 +1,7 @@
-using System.Collections.Generic;
-using PassthroughCameraSamples;
-using UnityEngine;
-using Meta.XR;
 using System;
+using System.Collections.Generic;
+using Meta.XR;
+using UnityEngine;
 
 public class QrCodeDisplayManager : MonoBehaviour
 {
@@ -11,8 +10,6 @@ public class QrCodeDisplayManager : MonoBehaviour
     [SerializeField] private EnvironmentRaycastManager envRaycastManager;
 
     private readonly Dictionary<string, MarkerController> _activeMarkers = new();
-    private WebCamTextureManager _webCamTextureManager;
-    private PassthroughCameraEye _passthroughCameraEye;
 
     private enum QrRaycastMode
     {
@@ -22,12 +19,6 @@ public class QrCodeDisplayManager : MonoBehaviour
     
     [SerializeField] private QrRaycastMode raycastMode = QrRaycastMode.PerCorner;
 
-    private void Awake()
-    {
-        _webCamTextureManager = FindAnyObjectByType<WebCamTextureManager>();
-        _passthroughCameraEye = _webCamTextureManager.Eye;
-    }
-
     private void Update()
     {
         UpdateMarkers();
@@ -35,6 +26,11 @@ public class QrCodeDisplayManager : MonoBehaviour
     
     private async void UpdateMarkers()
     {
+        if (!envRaycastManager)
+        {
+            return;
+        }
+
         var qrResults = await scanner.ScanFrameAsync() ?? Array.Empty<QrCodeResult>();
 
         foreach (var qrResult in qrResults)
@@ -55,29 +51,20 @@ public class QrCodeDisplayManager : MonoBehaviour
             foreach (var uv in uvs) centerUV += uv;
             centerUV /= count;
 
-            var intrinsics = PassthroughCameraUtils.GetCameraIntrinsics(_passthroughCameraEye);
-            var centerPixel = new Vector2Int(
-                Mathf.RoundToInt(centerUV.x * intrinsics.Resolution.x),
-                Mathf.RoundToInt(centerUV.y * intrinsics.Resolution.y)
-            );
-
-            var centerRay = PassthroughCameraUtils.ScreenPointToRayInWorld(_passthroughCameraEye, centerPixel);
-            if (!envRaycastManager || !envRaycastManager.Raycast(centerRay, out var centerHitInfo))
+            var centerRay = BuildWorldRay(qrResult, centerUV);
+            if (!envRaycastManager.Raycast(centerRay, out var centerHitInfo))
             {
                 continue;
             }
 
             var center = centerHitInfo.point;
             var distance = Vector3.Distance(centerRay.origin, center);
+            var qrPlane = new Plane(centerHitInfo.normal, centerHitInfo.point);
             var worldCorners = new Vector3[count];
 
             for (var i = 0; i < count; i++)
             {
-                var pixelCoord = new Vector2Int(
-                    Mathf.RoundToInt(uvs[i].x * intrinsics.Resolution.x),
-                    Mathf.RoundToInt(uvs[i].y * intrinsics.Resolution.y)
-                );
-                var r = PassthroughCameraUtils.ScreenPointToRayInWorld(_passthroughCameraEye, pixelCoord);
+                var r = BuildWorldRay(qrResult, uvs[i]);
 
                 if (raycastMode == QrRaycastMode.PerCorner)
                 {
@@ -87,12 +74,12 @@ public class QrCodeDisplayManager : MonoBehaviour
                     }
                     else
                     {
-                        worldCorners[i] = r.origin + r.direction * distance;
+                        worldCorners[i] = ProjectOntoPlane(qrPlane, r, distance);
                     }
                 }
                 else // CenterOnly
                 {
-                    worldCorners[i] = r.origin + r.direction * distance;
+                    worldCorners[i] = ProjectOntoPlane(qrPlane, r, distance);
                 }
             }
 
@@ -153,4 +140,62 @@ public class QrCodeDisplayManager : MonoBehaviour
         }
     }
 #endif
+
+    private static Vector2 ToViewport(Vector2 uv) => new(Mathf.Clamp01(uv.x), Mathf.Clamp01(uv.y));
+
+    private static Ray BuildWorldRay(QrCodeResult result, Vector2 uv)
+    {
+        var viewport = ToViewport(uv);
+        var intrinsics = result.intrinsics;
+        var sensorResolution = (Vector2)intrinsics.SensorResolution;
+        var currentResolution = (Vector2)result.captureResolution;
+        if (currentResolution == Vector2.zero)
+        {
+            currentResolution = sensorResolution;
+        }
+
+        var crop = ComputeSensorCrop(sensorResolution, currentResolution);
+        var sensorPoint = new Vector2(
+            crop.x + crop.width * viewport.x,
+            crop.y + crop.height * viewport.y);
+
+        var localDirection = new Vector3(
+            (sensorPoint.x - intrinsics.PrincipalPoint.x) / intrinsics.FocalLength.x,
+            (sensorPoint.y - intrinsics.PrincipalPoint.y) / intrinsics.FocalLength.y,
+            1f).normalized;
+
+        var worldDirection = result.cameraPose.rotation * localDirection;
+        return new Ray(result.cameraPose.position, worldDirection);
+    }
+
+    private static Rect ComputeSensorCrop(Vector2 sensorResolution, Vector2 currentResolution)
+    {
+        if (sensorResolution == Vector2.zero)
+        {
+            return new Rect(0, 0, currentResolution.x, currentResolution.y);
+        }
+
+        var scaleFactor = new Vector2(
+            currentResolution.x / sensorResolution.x,
+            currentResolution.y / sensorResolution.y);
+        var maxScale = Mathf.Max(scaleFactor.x, scaleFactor.y);
+        if (maxScale <= 0)
+        {
+            maxScale = 1f;
+        }
+        scaleFactor /= maxScale;
+
+        return new Rect(
+            sensorResolution.x * (1f - scaleFactor.x) * 0.5f,
+            sensorResolution.y * (1f - scaleFactor.y) * 0.5f,
+            sensorResolution.x * scaleFactor.x,
+            sensorResolution.y * scaleFactor.y);
+    }
+
+    private static Vector3 ProjectOntoPlane(Plane plane, Ray ray, float fallbackDistance)
+    {
+        return plane.Raycast(ray, out var planeDistance)
+            ? ray.GetPoint(planeDistance)
+            : ray.GetPoint(fallbackDistance);
+    }
 }

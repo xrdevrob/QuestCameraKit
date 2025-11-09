@@ -1,8 +1,7 @@
 using System;
-using UnityEngine;
-
 using System.Collections;
-using PassthroughCameraSamples;
+using Meta.XR;
+using UnityEngine;
 
 public class ObjectDetector : MonoBehaviour
 {
@@ -13,28 +12,23 @@ public class ObjectDetector : MonoBehaviour
     [SerializeField] private int kLayersPerFrame = 20;
     
     [Header("Detection Settings")]
-    [SerializeField] private WebCamTextureManager webCamTextureManager;
+    [SerializeField] private PassthroughCameraAccess cameraAccess;
     [SerializeField] private ObjectRenderer objectRenderer;
 
     private Unity.InferenceEngine.Model _model;
     private Unity.InferenceEngine.Worker _engine;
-    private Texture2D _cpuTexture;
     private Coroutine _inferenceCoroutine;
-    private WebCamTexture _webcamTexture;
+    private Texture _cameraTexture;
     private const int InputSize = 640;
 
     private void Start()
     {
-        print("[ObjectDetector] Starting up and acquiring webcam texture.");
-        _webcamTexture = webCamTextureManager.WebCamTexture;
-        if (_webcamTexture != null)
+        cameraAccess = ResolveCameraAccess(cameraAccess);
+        if (!cameraAccess)
         {
-            _cpuTexture = new Texture2D(_webcamTexture.width, _webcamTexture.height, TextureFormat.RGBA32, false);
-            print($"[ObjectDetector] WebCamTexture dimensions: {_webcamTexture.width}x{_webcamTexture.height}");
-        }
-        else
-        {
-            Debug.LogError("[ObjectDetector] WebCamTexture is null at Start.");
+            Debug.LogError("[ObjectDetector] PassthroughCameraAccess not found in the scene.");
+            enabled = false;
+            return;
         }
 
         LoadModel();
@@ -49,12 +43,6 @@ public class ObjectDetector : MonoBehaviour
             _inferenceCoroutine = null;
         }
         _engine?.Dispose();
-        if (_cpuTexture != null)
-        {
-            Destroy(_cpuTexture);
-            _cpuTexture = null;
-        }
-        
         print("[ObjectDetector] Destroyed and cleaned up.");
     }
 
@@ -76,36 +64,24 @@ public class ObjectDetector : MonoBehaviour
     {
         while (isActiveAndEnabled)
         {
-            if (!_webcamTexture)
+            if (!TryEnsureCameraTexture())
             {
-                _webcamTexture = webCamTextureManager.WebCamTexture;
-                
-                if (_webcamTexture)
-                {
-                    _cpuTexture = new Texture2D(_webcamTexture.width, _webcamTexture.height, TextureFormat.RGBA32, false);
-                    print("[ObjectDetector] WebCamTexture is now available; CPU texture created.");
-                }
+                yield return null;
+                continue;
             }
 
             yield return new WaitForSeconds(inferenceInterval);
 
-            if (!_cpuTexture)
-            {
-                Debug.LogWarning("[ObjectDetector] CPU texture is null, skipping iteration.");
-                continue;
-            }
-
-            _cpuTexture.SetPixels(_webcamTexture.GetPixels());
-            _cpuTexture.Apply();
-
             print("[ObjectDetector] Running inference iteration.");
-            yield return StartCoroutine(PerformInference(_cpuTexture));
+            yield return StartCoroutine(PerformInference(_cameraTexture));
         }
     }
 
     private IEnumerator PerformInference(Texture texture)
     {
-        var inputTensor = Unity.InferenceEngine.TextureConverter.ToTensor(texture, InputSize, InputSize, 3);
+        var tensorShape = new Unity.InferenceEngine.TensorShape(1, 3, InputSize, InputSize);
+        var inputTensor = new Unity.InferenceEngine.Tensor<float>(tensorShape);
+        Unity.InferenceEngine.TextureConverter.ToTensor(texture, inputTensor);
         print("[ObjectDetector] Input tensor created.");
 
         var schedule = _engine.ScheduleIterable(inputTensor);
@@ -197,5 +173,41 @@ public class ObjectDetector : MonoBehaviour
             }
             yield return null;
         }
+    }
+
+    private bool TryEnsureCameraTexture()
+    {
+        cameraAccess = ResolveCameraAccess(cameraAccess);
+        if (!cameraAccess || !cameraAccess.IsPlaying)
+        {
+            return false;
+        }
+
+        if (_cameraTexture)
+        {
+            return true;
+        }
+
+        _cameraTexture = cameraAccess.GetTexture();
+        if (_cameraTexture)
+        {
+            var resolution = cameraAccess.CurrentResolution;
+            print($"[ObjectDetector] Passthrough texture ready: {resolution.x}x{resolution.y}");
+        }
+        else
+        {
+            Debug.LogWarning("[ObjectDetector] Passthrough texture not available yet.");
+        }
+
+        return _cameraTexture != null;
+    }
+
+    private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
+    {
+        if (configuredAccess)
+        {
+            return configuredAccess;
+        }
+        return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
     }
 }

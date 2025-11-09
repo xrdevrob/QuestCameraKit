@@ -1,16 +1,16 @@
 using System.Collections;
+using Meta.XR;
 using UnityEngine;
-using PassthroughCameraSamples;
 
 namespace QuestCameraKit.FrostedGlass
 {
     public class CameraTextureMapper : MonoBehaviour
     {
-        [SerializeField] private WebCamTextureManager passthroughCameraManager;
+        [SerializeField] private PassthroughCameraAccess passthroughCamera;
         [SerializeField] private Material mappingBlurMaterial;
         [SerializeField] private Color tintColor = Color.white;
 
-        private WebCamTexture _webcamTexture;
+        private Texture _cameraTexture;
         private bool _cameraFound = true;
 
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
@@ -24,37 +24,50 @@ namespace QuestCameraKit.FrostedGlass
 
         private IEnumerator Start()
         {
-            yield return new WaitUntil(() =>
-                passthroughCameraManager.WebCamTexture != null && passthroughCameraManager.WebCamTexture.isPlaying);
+            passthroughCamera = ResolveCameraAccess(passthroughCamera);
+            yield return new WaitUntil(() => passthroughCamera && passthroughCamera.IsPlaying);
 
-            _webcamTexture = passthroughCameraManager.WebCamTexture;
-            mappingBlurMaterial.SetTexture(MainTexId, _webcamTexture);
+            if (!passthroughCamera)
+            {
+                Debug.LogWarning("[CameraTextureMapper] Passthrough camera not found.");
+                yield break;
+            }
+
+            _cameraTexture = passthroughCamera.GetTexture();
+            if (!_cameraTexture)
+            {
+                Debug.LogWarning("[CameraTextureMapper] Passthrough texture missing.");
+                yield break;
+            }
+
+            mappingBlurMaterial.SetTexture(MainTexId, _cameraTexture);
             mappingBlurMaterial.SetColor(TintColorId, tintColor);
 
-            var intrinsics = PassthroughCameraUtils.GetCameraIntrinsics(passthroughCameraManager.Eye);
+            var intrinsics = passthroughCamera.Intrinsics;
             mappingBlurMaterial.SetVector(IntrinsicResolutionId,
-                new Vector4(intrinsics.Resolution.x, intrinsics.Resolution.y, 0, 0));
+                new Vector4(intrinsics.SensorResolution.x, intrinsics.SensorResolution.y, 0, 0));
         }
 
         private void Update()
         {
-            if (!_webcamTexture || !_cameraFound) return;
+            if (!_cameraTexture || !_cameraFound || !passthroughCamera || !passthroughCamera.IsPlaying) return;
 
-            var texSize = new Vector2(_webcamTexture.width, _webcamTexture.height);
+            var resolution = passthroughCamera.CurrentResolution;
+            var texSize = new Vector2(resolution.x, resolution.y);
             mappingBlurMaterial.SetVector(TextureSizeId, texSize);
 
             try
             {
-                var camPose = PassthroughCameraUtils.GetCameraPoseInWorld(passthroughCameraManager.Eye);
+                var camPose = passthroughCamera.GetCameraPose();
                 mappingBlurMaterial.SetVector(CameraPosId, camPose.position);
                 mappingBlurMaterial.SetMatrix(CameraRotationMatrixId,
                     Matrix4x4.Rotate(Quaternion.Inverse(camPose.rotation)));
 
-                var intrinsics = PassthroughCameraUtils.GetCameraIntrinsics(passthroughCameraManager.Eye);
+                var intrinsics = passthroughCamera.Intrinsics;
                 mappingBlurMaterial.SetVector(FocalLengthId, intrinsics.FocalLength);
                 mappingBlurMaterial.SetVector(PrincipalPointId, intrinsics.PrincipalPoint);
                 mappingBlurMaterial.SetVector(IntrinsicResolutionId,
-                    new Vector4(intrinsics.Resolution.x, intrinsics.Resolution.y, 0, 0));
+                    new Vector4(intrinsics.SensorResolution.x, intrinsics.SensorResolution.y, 0, 0));
             }
             catch (System.ApplicationException)
             {
@@ -64,13 +77,23 @@ namespace QuestCameraKit.FrostedGlass
 
         private void OnRenderImage(RenderTexture source, RenderTexture destination)
         {
-            if (_webcamTexture == null)
+            if (_cameraTexture == null)
             {
                 Graphics.Blit(source, destination);
                 return;
             }
 
-            Graphics.Blit(_webcamTexture, destination, mappingBlurMaterial);
+            Graphics.Blit(_cameraTexture, destination, mappingBlurMaterial);
+        }
+
+        private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
+        {
+            if (configuredAccess)
+            {
+                return configuredAccess;
+            }
+
+            return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
         }
     }
 }

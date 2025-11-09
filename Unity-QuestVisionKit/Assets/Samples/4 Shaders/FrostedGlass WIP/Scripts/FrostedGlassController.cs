@@ -1,23 +1,47 @@
 using System.Collections;
+using Meta.XR;
 using UnityEngine;
-using PassthroughCameraSamples;
 
 namespace QuestCameraKit.FrostedGlass
 {
     public class FrostedGlassController : MonoBehaviour
     {
-        [SerializeField] private WebCamTextureManager passthroughCameraManager;
+        [SerializeField] private PassthroughCameraAccess passthroughCamera;
         [SerializeField] private Material baseMapMaterial;
 
-        private WebCamTexture _webcamTexture;
+        private Texture _cameraTexture;
         private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
 
         private IEnumerator Start()
         {
-            yield return new WaitUntil(() => passthroughCameraManager.WebCamTexture != null && passthroughCameraManager.WebCamTexture.isPlaying);
+            passthroughCamera = ResolveCameraAccess(passthroughCamera);
+            yield return new WaitUntil(() => passthroughCamera && passthroughCamera.IsPlaying);
 
-            _webcamTexture = passthroughCameraManager.WebCamTexture;
-            baseMapMaterial.SetTexture(BaseMapId, _webcamTexture);
+            if (!passthroughCamera)
+            {
+                Debug.LogWarning("[FrostedGlassController] Passthrough camera not located.");
+                yield break;
+            }
+
+            _cameraTexture = passthroughCamera.GetTexture();
+            if (_cameraTexture)
+            {
+                baseMapMaterial.SetTexture(BaseMapId, _cameraTexture);
+            }
+            else
+            {
+                Debug.LogWarning("[FrostedGlassController] Passthrough texture unavailable.");
+            }
+        }
+
+        private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
+        {
+            if (configuredAccess)
+            {
+                return configuredAccess;
+            }
+
+            return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
         }
     }
 }

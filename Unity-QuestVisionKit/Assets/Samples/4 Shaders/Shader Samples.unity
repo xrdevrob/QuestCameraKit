@@ -462,6 +462,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -483,6 +485,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -726,7 +729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: 166682cbec30a0343bc438e4fb509df0, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &182338033
@@ -965,7 +968,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -973,6 +975,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &265084208
 GameObject:
   m_ObjectHideFlags: 0
@@ -1174,7 +1177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: f3e93946a0e8ab74e8f13f1399284c36, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &311422946
@@ -1634,7 +1637,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: d37ee0609de75d74f8fd282b0cce0310, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &399322432
@@ -1820,17 +1823,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 3
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &410951483
 GameObject:
   m_ObjectHideFlags: 0
@@ -1862,7 +1871,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: f2aab3bf903b67b4bbb75a228abc8aa8, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &410951485
@@ -2375,7 +2384,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: 19791ad32b739874ba2e14c25a000adc, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &443982304
@@ -2832,6 +2841,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2853,6 +2864,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -3070,7 +3082,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: e69e1d5573e29134f9124304187f4a76, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &489585530
@@ -3334,6 +3346,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3355,6 +3369,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -3682,6 +3697,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3703,6 +3720,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -3790,6 +3808,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3811,6 +3831,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -4385,6 +4406,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4406,6 +4429,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -4639,7 +4663,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: 5ca19617dd129324b8f0eae50a29a08f, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &799046131
@@ -4853,6 +4877,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4874,6 +4900,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -5682,6 +5709,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5703,6 +5732,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -6158,6 +6188,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -6179,6 +6211,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -7123,6 +7156,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -7144,6 +7179,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -7384,7 +7420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: 7ccdefd6456b0174dafeb09be14b985b, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1295925068
@@ -7716,7 +7752,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -7724,6 +7759,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!114 &1313410715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7760,7 +7796,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -7768,6 +7803,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!4 &1313738057 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 459718, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
@@ -8563,6 +8599,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -8584,6 +8622,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -8743,7 +8782,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2609c54f376cffc4da1ab9401cc1a36f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _skeletonType: 1
+  _skeletonType: 5
   _updateRootPose: 0
   _updateRootScale: 1
   _enablePhysicsCapsules: 0
@@ -8797,82 +8836,6 @@ Transform:
   - {fileID: 1332194056}
   m_Father: {fileID: 1349299923}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1436385066
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1748868316715821956, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: requestedResolution.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1748868316715821956, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: requestedResolution.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7047676844597515174, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7847449403238870662, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-      propertyPath: m_Name
-      value: PassthroughCameraApiPrefab
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: abfaad578d05e4a09838223134c41c46, type: 3}
---- !u!114 &1436385067 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1748868316715821956, guid: abfaad578d05e4a09838223134c41c46, type: 3}
-  m_PrefabInstance: {fileID: 1436385066}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef9a7893e57c04c0db4114c70954b915, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1448982554
 GameObject:
   m_ObjectHideFlags: 0
@@ -8918,7 +8881,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2609c54f376cffc4da1ab9401cc1a36f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _skeletonType: 0
+  _skeletonType: 4
   _updateRootPose: 0
   _updateRootScale: 1
   _enablePhysicsCapsules: 0
@@ -10140,6 +10103,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -10161,6 +10126,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -10395,7 +10361,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: 622888b7c89267c41b74e0b71aae8515, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1855524260
@@ -10692,7 +10658,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: b797c80ce4db8444da0fb54036373854, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1918988949
@@ -10950,7 +10916,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce2e6c6446442415f90c72823e591c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  passthroughCameraManager: {fileID: 1436385067}
+  passthroughCamera: {fileID: 2018835755}
   mappingBlurMaterial: {fileID: 2100000, guid: 39dd2dd000de97748a6bc653ac68ef31, type: 2}
   tintColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1932496121
@@ -11095,6 +11061,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -11116,6 +11084,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -11532,6 +11501,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2018835753}
   - component: {fileID: 2018835754}
+  - component: {fileID: 2018835755}
   m_Layer: 4
   m_Name: Interactables
   m_TagString: Untagged
@@ -11589,6 +11559,22 @@ MonoBehaviour:
   - {fileID: 1921451524}
   - {fileID: 440708758}
   - {fileID: 488630229}
+--- !u!114 &2018835755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018835752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef9a7893e57c04c0db4114c70954b915, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: meta.xr.mrutilitykit::Meta.XR.PassthroughCameraAccess
+  CameraPosition: 0
+  RequestedResolution: {x: 1280, y: 960}
+  TargetMaterial: {fileID: 0}
+  _texturePropertyName: 
 --- !u!1 &2077418816
 GameObject:
   m_ObjectHideFlags: 0
@@ -12786,6 +12772,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 410087041}
   - {fileID: 1313410703}
-  - {fileID: 1436385066}
   - {fileID: 2018835753}
   - {fileID: 1691896953}

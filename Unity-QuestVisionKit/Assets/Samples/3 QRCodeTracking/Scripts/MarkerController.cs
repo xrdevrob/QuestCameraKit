@@ -5,11 +5,9 @@ public class MarkerController : MonoBehaviour
 {
     private TextMeshProUGUI _textMesh;
     public float lastUpdateTime;
-    private Camera _camera;
 
     private void Awake()
     {
-        _camera = Camera.main;
         _textMesh = GetComponentInChildren<TextMeshProUGUI>();
         if (_textMesh == null)
         {
@@ -38,11 +36,6 @@ public class MarkerController : MonoBehaviour
 
     private void Update()
     {
-        if (_textMesh)
-        {
-            _textMesh.transform.rotation = Quaternion.LookRotation(_textMesh.transform.position - _camera.transform.position);
-        }
-    
         if (gameObject.activeSelf && Time.time - lastUpdateTime > 2f)
         {
             gameObject.SetActive(false);

@@ -1,13 +1,12 @@
+using System;
+using System.Collections.Generic;
 using Meta.XR;
 using UnityEngine;
-
-using PassthroughCameraSamples;
-using System.Collections.Generic;
 
 public class ObjectRenderer : MonoBehaviour
 {
     [Header("Camera & Raycast Settings")]
-    [SerializeField] private WebCamTextureManager webCamTextureManager;
+    [SerializeField] private PassthroughCameraAccess cameraAccess;
     [SerializeField] private EnvironmentRaycastManager envRaycastManager;
     [SerializeField] private float mergeThreshold = 0.2f;
     
@@ -28,13 +27,22 @@ public class ObjectRenderer : MonoBehaviour
     
     public void RenderDetections(Unity.InferenceEngine.Tensor<float> coords, Unity.InferenceEngine.Tensor<int> labelIDs)
     {
+        cameraAccess = ResolveCameraAccess(cameraAccess);
+        if (!cameraAccess || !cameraAccess.IsPlaying)
+        {
+            Debug.LogWarning("[Detection3DRenderer] Passthrough camera is not ready.");
+            return;
+        }
+        if (!envRaycastManager)
+        {
+            Debug.LogWarning("[Detection3DRenderer] EnvironmentRaycastManager missing.");
+            return;
+        }
+
         var numDetections = coords.shape[0];
         print($"[Detection3DRenderer] RenderDetections: {numDetections} detections received.");
         ClearPreviousMarkers();
 
-        var intrinsics = PassthroughCameraUtils.GetCameraIntrinsics(webCamTextureManager.Eye);
-        var camRes = intrinsics.Resolution;
-        
         var imageWidth = YoloInputSize;
         var imageHeight = YoloInputSize;
         var halfWidth = imageWidth * 0.5f;
@@ -53,10 +61,7 @@ public class ObjectRenderer : MonoBehaviour
             var perX = (adjustedCenterX + halfWidth) / imageWidth;
             var perY = (adjustedCenterY + halfHeight) / imageHeight;
 
-            var centerPixel = new Vector2(perX * camRes.x, (1.0f - perY) * camRes.y);
-            print($"[Detection3DRenderer] Detection {i} Center Pixel: {centerPixel}");
-
-            var centerRay = PassthroughCameraUtils.ScreenPointToRayInWorld(webCamTextureManager.Eye, new Vector2Int(Mathf.RoundToInt(centerPixel.x), Mathf.RoundToInt(centerPixel.y)));
+            var centerRay = cameraAccess.ViewportPointToRay(ToViewport(perX, perY));
 
             if (!envRaycastManager.Raycast(centerRay, out var centerHit))
             {
@@ -71,18 +76,8 @@ public class ObjectRenderer : MonoBehaviour
             var u2 = (detectedCenterX + detectedWidth * 0.5f) / imageWidth;
             var v2 = (detectedCenterY + detectedHeight * 0.5f) / imageHeight;
 
-            var tlPixel = new Vector2Int(
-                Mathf.RoundToInt(u1 * camRes.x),
-                Mathf.RoundToInt((1.0f - v1) * camRes.y)
-            );
-            
-            var brPixel = new Vector2Int(
-                Mathf.RoundToInt(u2 * camRes.x),
-                Mathf.RoundToInt((1.0f - v2) * camRes.y)
-            );
-
-            var tlRay = PassthroughCameraUtils.ScreenPointToRayInWorld(webCamTextureManager.Eye, tlPixel);
-            var brRay = PassthroughCameraUtils.ScreenPointToRayInWorld(webCamTextureManager.Eye, brPixel);
+            var tlRay = cameraAccess.ViewportPointToRay(ToViewport(u1, v1));
+            var brRay = cameraAccess.ViewportPointToRay(ToViewport(u2, v2));
 
             var depth = Vector3.Distance(_mainCamera.transform.position, markerWorldPos);
             var worldTL = tlRay.GetPoint(depth);
@@ -134,5 +129,19 @@ public class ObjectRenderer : MonoBehaviour
             }
         }
         _activeMarkers.Clear();
+    }
+
+    private static Vector2 ToViewport(float normalizedX, float normalizedY)
+    {
+        return new Vector2(Mathf.Clamp01(normalizedX), Mathf.Clamp01(1f - Mathf.Clamp01(normalizedY)));
+    }
+
+    private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
+    {
+        if (configuredAccess)
+        {
+            return configuredAccess;
+        }
+        return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
     }
 }

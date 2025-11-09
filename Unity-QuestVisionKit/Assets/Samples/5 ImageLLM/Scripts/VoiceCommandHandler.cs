@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Linq;
+using Meta.XR;
+using Unity.Collections;
 using UnityEngine;
-using PassthroughCameraSamples;
 
 namespace QuestCameraKit.OpenAI
 {
     public class VoiceCommandHandler : MonoBehaviour
     {
-        [SerializeField] private WebCamTextureManager webcamManager;
+        [SerializeField] private PassthroughCameraAccess cameraAccess;
         [SerializeField] private ImageOpenAIConnector imageConnector;
 
         [Header("Image (For testing in Editor)")]
@@ -46,8 +47,7 @@ namespace QuestCameraKit.OpenAI
         {
             Texture2D capturedTexture;
 
-            if (Application.isEditor || !webcamManager || !webcamManager.WebCamTexture ||
-                !webcamManager.WebCamTexture.isPlaying)
+            if (Application.isEditor || !TryResolveCameraAccess(out var access) || !access.IsPlaying)
             {
                 if (dummyImage)
                 {
@@ -67,10 +67,12 @@ namespace QuestCameraKit.OpenAI
                 // Delay so we can avoid having our controller or hand in the image
                 yield return new WaitForSeconds(1.0f);
                 yield return new WaitForEndOfFrame();
-                var webCamTex = webcamManager.WebCamTexture;
-                capturedTexture = new Texture2D(webCamTex.width, webCamTex.height, TextureFormat.RGBA32, false);
-                capturedTexture.SetPixels(webCamTex.GetPixels());
-                capturedTexture.Apply();
+                capturedTexture = CapturePassthroughFrame(access);
+                if (!capturedTexture)
+                {
+                    Debug.LogWarning("VoiceCommandHandler: Failed to capture passthrough frame, falling back to dummy image.");
+                    capturedTexture = dummyImage ? dummyImage : CreateFallbackTexture();
+                }
             }
 
             if (imageConnector)
@@ -81,6 +83,43 @@ namespace QuestCameraKit.OpenAI
             {
                 Debug.LogError("ImageOpenAIConnector not assigned in VoiceCommandHandler.");
             }
+        }
+
+        private bool TryResolveCameraAccess(out PassthroughCameraAccess access)
+        {
+            access = cameraAccess ? cameraAccess : FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
+            cameraAccess = access;
+            return access;
+        }
+
+        private static Texture2D CreateFallbackTexture()
+        {
+            var texture = new Texture2D(512, 512, TextureFormat.RGB24, false);
+            var fillColor = Color.gray;
+            var fillPixels = Enumerable.Repeat(fillColor, 512 * 512).ToArray();
+            texture.SetPixels(fillPixels);
+            texture.Apply();
+            return texture;
+        }
+
+        private Texture2D CapturePassthroughFrame(PassthroughCameraAccess access)
+        {
+            var resolution = access.CurrentResolution;
+            if (resolution == Vector2Int.zero)
+            {
+                return null;
+            }
+
+            var colors = access.GetColors();
+            if (!colors.IsCreated)
+            {
+                return null;
+            }
+
+            var texture = new Texture2D(resolution.x, resolution.y, TextureFormat.RGBA32, false);
+            texture.SetPixelData(colors, 0);
+            texture.Apply();
+            return texture;
         }
     }
 }
