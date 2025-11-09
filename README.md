@@ -199,6 +199,7 @@ You can send commands and receive results in any of these languages:
     </tr>
   </table>
 </details>
+</details>
 
 https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
