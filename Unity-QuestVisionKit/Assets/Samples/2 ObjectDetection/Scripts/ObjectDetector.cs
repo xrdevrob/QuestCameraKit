@@ -43,7 +43,6 @@ public class ObjectDetector : MonoBehaviour
         }
         
         _engine?.Dispose();
-        print("[ObjectDetector] Destroyed and cleaned up.");
     }
 
     private void LoadModel()
@@ -52,7 +51,6 @@ public class ObjectDetector : MonoBehaviour
         {
             _model = Unity.InferenceEngine.ModelLoader.Load(sentisModel);
             _engine = new Unity.InferenceEngine.Worker(_model, backend);
-            print("[ObjectDetector] Model loaded successfully.");
         }
         catch (Exception e)
         {
@@ -81,7 +79,6 @@ public class ObjectDetector : MonoBehaviour
         var tensorShape = new Unity.InferenceEngine.TensorShape(1, 3, InputSize, InputSize);
         var inputTensor = new Unity.InferenceEngine.Tensor<float>(tensorShape);
         Unity.InferenceEngine.TextureConverter.ToTensor(texture, inputTensor);
-        print("[ObjectDetector] Input tensor created.");
 
         var schedule = _engine.ScheduleIterable(inputTensor);
         if (schedule == null)
@@ -101,8 +98,10 @@ public class ObjectDetector : MonoBehaviour
 
         Unity.InferenceEngine.Tensor<float> coordsOutput = null;
         Unity.InferenceEngine.Tensor<int> labelIDsOutput = null;
+        Unity.InferenceEngine.Tensor<float> confidenceOutput = null;
         Unity.InferenceEngine.Tensor<float> pullCoords = _engine.PeekOutput(0) as Unity.InferenceEngine.Tensor<float>;
         Unity.InferenceEngine.Tensor<int> pullLabelIDs = _engine.PeekOutput(1) as Unity.InferenceEngine.Tensor<int>;
+        Unity.InferenceEngine.Tensor<float> pullConfidences = TryPeekConfidenceOutput();
 
         var isWaiting = false;
         var downloadState = 0;
@@ -147,25 +146,44 @@ public class ObjectDetector : MonoBehaviour
                     {
                         labelIDsOutput = pullLabelIDs.ReadbackAndClone();
                         isWaiting = false;
-                        downloadState = 2;
+                        downloadState = pullConfidences != null ? 2 : 3;
                     }
                     break;
                 case 2:
-                    print("[ObjectDetector] Rendering detections.");
+                    if (pullConfidences?.dataOnBackend == null)
+                    {
+                        pullConfidences = null;
+                        downloadState = 3;
+                        break;
+                    }
+                    if (!isWaiting)
+                    {
+                        pullConfidences.ReadbackRequest();
+                        isWaiting = true;
+                    }
+                    else if (pullConfidences.IsReadbackRequestDone())
+                    {
+                        confidenceOutput = pullConfidences.ReadbackAndClone();
+                        isWaiting = false;
+                        downloadState = 3;
+                    }
+                    break;
+                case 3:
                     if (_objectRenderer)
                     {
                         _objectRenderer.RenderDetections(
                             coordsOutput, 
-                            labelIDsOutput
+                            labelIDsOutput,
+                            confidenceOutput
                         );
                     }
-                    downloadState = 3;
+                    downloadState = 4;
                     break;
-                case 3:
-                    print("[ObjectDetector] Inference iteration complete.");
+                case 4:
                     inputTensor.Dispose();
                     coordsOutput?.Dispose();
                     labelIDsOutput?.Dispose();
+                    confidenceOutput?.Dispose();
                     yield break;
             }
             yield return null;
@@ -196,5 +214,17 @@ public class ObjectDetector : MonoBehaviour
         }
 
         return _cameraTexture;
+    }
+
+    private Unity.InferenceEngine.Tensor<float> TryPeekConfidenceOutput()
+    {
+        try
+        {
+            return _engine.PeekOutput(2) as Unity.InferenceEngine.Tensor<float>;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 }

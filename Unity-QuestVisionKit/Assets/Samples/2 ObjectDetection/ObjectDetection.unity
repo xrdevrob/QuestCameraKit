@@ -1025,7 +1025,7 @@ MonoBehaviour:
   mrcActivationMode: 0
   launchSimultaneousHandsControllersOnStartup: 0
   isInsightPassthroughEnabled: 1
-  shouldBoundaryVisibilityBeSuppressed: 0
+  shouldBoundaryVisibilityBeSuppressed: 1
   requestBodyTrackingPermissionOnStartup: 0
   requestFaceTrackingPermissionOnStartup: 0
   requestEyeTrackingPermissionOnStartup: 0
@@ -1391,6 +1391,7 @@ MonoBehaviour:
   mergeThreshold: 0.2
   markerPrefab: {fileID: 7985637374133528724, guid: f607a6951ee6b47e69cbb77c038044d6, type: 3}
   labelFilters: 
+  minConfidence: 0.2
 --- !u!114 &2003488192
 MonoBehaviour:
   m_ObjectHideFlags: 0
