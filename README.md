@@ -5,12 +5,13 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 # Table of Contents
 - [Overview](#overview)
+- [Update Notes](#update-notes)
 - [Getting Started with PCA](#getting-started-with-pca)
 - [Running the Samples](#running-the-samples)
 - [General Troubleshooting & Known Issues](#general-troubleshooting--known-issues)
-- [Acknowledgements & Credits](#acknowledgements--credits)
 - [Community Contributions](#community-contributions)
 - [News](#news)
+- [Acknowledgements & Credits](#acknowledgements--credits)
 - [License](#license)
 - [Contact](#contact)
 
@@ -66,6 +67,19 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 |------------------------------|------------------------------------|
 | <img src="Media/PCA_WebRTC.gif" width="500"/> | <img src="Media/QrCodeDetection.png" width="500"/> |
 
+# Update Notes
+
+## Meta XR SDK v81 refresh - One script to rule them all
+
+> The legacy `WebCamTexture` helpers have been fully retired. Every sample now talks directly to `PassthroughCameraAccess` component, which is part of the MRUK package, and consumes the native render texture, intrinsics, and per-frame pose data. It also offers us timestamps and both eyes at the same time.
+
+- **Single PCA component** – All samples reference the same configured PCA component; no more bespoke permission scripts or manifest edits.
+- **Direct GPU textures** – Sentis inference, QR tracking, Frosted Glass shaders, WebRTC, and OpenAI capture now pull the PCA render texture directly, preserving latency and aspect ratio.
+- **Pose-aware reprojection** – Object/QR samples reconstruct rays with per-frame PCA pose + intrinsics so markers no longer drift when the user nods.
+- **Environment-aware markers** – Marker placement re-samples environment normals and optionally drops detections below a configurable confidence threshold.
+- **Shared marker assets** – Marker prefab/pool/controller moved to `Assets/Samples/Common/Markers`, keeping Sentis + QR samples in sync.
+- **Shader updates** – Camera-mapped shaders understand PCA UV scale/offsets so effects don’t mirror, split into quadrants, or flip vertically.
+
 # Getting Started with PCA
 
 | **Information**        | **Details**                                                                                                                                                                                             |
@@ -82,9 +96,6 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 - **Unity:** Recommended is `Unity 6`. Also runs on Unity `2022.3. LTS`.
 - **Camera Passthrough API does not work in the Editor or XR Simulator.**
 - Get more information from the [Meta Quest Developer Documentation](https://developers.meta.com/horizon/documentation/unity/unity-pca-documentation)
-
-> [!CAUTION]
-> Every feature involving accessing the camera has significant impact on your application's performance. Be aware of this and ask yourself if the feature you are trying to implement can be done any other way besides using cameras.
 
 ## Installation
 1. **Clone the Repository:**
@@ -389,58 +400,10 @@ You can send commands and receive results in any of these languages:
 - Build and deploy the `QRCodeDetection` scene to your Quest3 device.
 - Use your controllers to interact with the UI. No hand tracking support yet.
 
-**Troubleshooting**:
-- Go to `Window/TextMeshPro` and click on `Import TMP Essential Resources`
-- Make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
-
 # General Troubleshooting & Known Issues
 
-- Some users have reported that the app crashes the second and every following time the app is opened. A solution described was to go to the Quest settings under `Privacy & Security` and toggle the camera permission and then start the app and accept the permission again. If you encounter this problem please open an issue and send me the crash logs. Thank you!
+- For sample 7 QR Code Detection, make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
 - If switching betwenn Unity 6 and other versions such as 2023 or 2022 it can happen that your Android Manifest is getting modified and the app won't run anymore. Should this happen to you make sure to go to `Meta > Tools > Update AndroidManifest.xml` or `Meta > Tools > Create store-compatible AndroidManifest.xml`. After that make sure you add back the `horizonos.permission.HEADSET_CAMERA` manually into your manifest file.
-
-# Acknowledgements & Credits
-
-- Thanks to **Meta** for the Passthrough Camera API and [**Passthrough Camera API Samples**](https://github.com/oculus-samples/Unity-PassthroughCameraApiSamples/).
-- Thanks to shader wizard [Daniel Ilett](https://www.youtube.com/@danielilett) for helping me in the shader samples.
-- Thanks to **[Michael Jahn](https://github.com/micjahn/ZXing.Net/)** for the XZing.Net library used for the QR code tracking samples.
-- Thanks to **[Julian Triveri](https://github.com/trev3d/QuestDisplayAccessDemo)** for constantly pushing the boundaries with what is possible with Meta Quest hardware and software.
-- Special thanks to [Markus Altenhofer](https://www.linkedin.com/in/markus-altenhofer-176453155/) from [FireDragonGameStudio](https://www.youtube.com/@firedragongamestudio) for contributing the WebRTC sample scene.
-- Special thanks to [Thomas Ratliff](https://x.com/devtom7) for contributing his [shader samples](https://x.com/devtom7/status/1902033672041091453) to the repo.
-
-# Community Highlights
-
-I wanted to dedicate this section to a couple of developers that are doing some great work with Meta Quest and especially the Passthrough Camera API and are actively working on some exciting prototypes:
-
-- [Takashi Yoshinaga](https://x.com/Taka_Yoshinaga): Takashi has been doing amazing explorations in XR and with Meta Quest for a long time. His work focuses mainly on scene understanding and scanning. Takashi has also created his own [GitHub repo](https://github.com/TakashiYoshinaga/QuestArUcoMarkerTracking), showing other developers how to use the Unity OpenCV plugin for marker tracking and more.
-  - [Turning image into colored point cloud](https://x.com/Tks_Yoshinaga/status/1900923909962133782)
-  - [Point cloud data from Quest in real time](https://x.com/taka_yoshinaga/status/1910141763173712333)
-  - [Map color images onto a point cloud by combining Quest's Depth API and Passthrough Camera API](https://x.com/Tks_Yoshinaga/status/1916381129508012107)
-  - [Using Passthrough Camera API with the OpenCV for Unity plugin](https://x.com/Tks_Yoshinaga/status/1901187442084098464)
-  - [OpenCV marker detection for object tracking](https://x.com/taka_yoshinaga/status/1901560686603387255)
-  - [OpenCV marker detection for multiple objects](https://x.com/Taka_Yoshinaga/status/1902700309933371558)
-
-- [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): Christoph was one of the first developers to publicly jump on the the Passthrough Camera API and post his prototypes. He is working on a very interesting and innovative football tracker project. This project uses the Camera2 API because it is slightly faster and less performance-demanding as oppose to Unity's WebCamTexture implementation. The football is tracked according to its color. Color tracking is handled via OpenCV for Unity. A color picker allows the user to directly select the color to be tracked from the object itself. Check out Christoph's work:
-  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [Tracking a real ball and playing some XR football](https://www.linkedin.com/feed/update/urn:li:activity:7314282273791471616/)
-  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [Custom ball-controller for the Meta Quest 3](https://www.linkedin.com/posts/christoph-spinger-280621190_i-just-worked-up-a-real-sweat-playing-vr-activity-7321457451889844225-HiTv?utm_source=share&utm_medium=member_desktop&rcm=ACoAACRDIgYBe94CQK8Ln4nJhdS1WdG2y9aZHYs)
-  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [Chameleon color picker](https://www.linkedin.com/feed/update/urn:li:activity:7306688023843250176/)
-  - [Christoph Spinger](https://www.linkedin.com/in/christoph-spinger-280621190/): [QR code object tracking](https://www.linkedin.com/feed/update/urn:li:activity:7306652200418598912/)
-
-- [Thomas Ratcliff](https://x.com/devtom7): A super talented technical artist you should definitely follow. He has been working on passthrough shaders and lighting estimation.
-  - [Water, blur, zoom shaders](https://x.com/devtom7/status/1901384363658350612)
-  - [Pixelate shader](https://x.com/devtom7/status/1902033672041091453)
-  - [Dynamic reflection data generation](https://x.com/devtom7/status/1913667214399414659)
-  - [Camera based reflection and lighting](https://x.com/devtom7/status/1913965819987366267)
-  
-- [Hugues Bruyère](https://x.com/smallfly): Hugues is showcasing and continuously improving his image capturing and stable diffusion prototype. It demonstartes how to capture multiple images, geenrate new images, and stitch them together.
-  - [MR + Diffusion prototype](https://x.com/smallfly/status/1901403937321750862)
-  - [SAM 2 to our workflow to segment people](https://x.com/smallfly/status/1903560186381377735)
-  - [Mixed Reality + Diffusion prototype as a tool for exploring concepts, styles, and moods by transforming real-world surroundings into alternate realities.](https://x.com/smallfly/status/1916234097724215599)
-
-- [Markus Altenhofer](https://www.linkedin.com/in/markus-altenhofer-176453155/): Markus has been putting out some amazing content around Meta Quest and recently combining it with the Passthrough Camera API. You can find all his work on his YouTube channel [FireDragonGameStudio](https://www.youtube.com/@firedragongamestudio).
-  - [Easy WebRTC video streaming to multiple devices](https://www.youtube.com/watch?v=1R9yrXePJ40)
-  - [Indoor Navigation with QRCode tracking](https://www.youtube.com/watch?v=EUqaOGJxLiY&t)
-  - [XR Minecraft with Meta Quest 3 Depth Sensor and ColorPicker](https://www.youtube.com/watch?v=CNoueOloXNo&t)
-  - [Room detection with Quest 3 Depth Sensor and Object Detection](https://www.youtube.com/watch?v=iimtkRqRxLc)
 
 # Community Contributions
 
@@ -515,6 +478,14 @@ I wanted to dedicate this section to a couple of developers that are doing some 
 - (Mar 18 2025) Road to VR - [Meta Releases Quest Camera Access for Developers, Promising Even More Immersive MR Games](https://www.roadtovr.com/meta-releases-quest-camera-access-for-developers-promising-even-more-immersive-mixed-reality-games/)
 - (Mar 17 2025) MIXED Reality News - [Quest developers get new powerful API for mixed reality apps](https://mixed-news.com/en/meta-quest-3-passthrough-camera-api-experimental-release/)
 - (Mar 14 2025) UploadVR - [Quest's Passthrough Camera API Is Out Now, Though Store Apps Can't Yet Use It](https://www.uploadvr.com/quest-passthrough-camera-api-experimental-out-now/)
+
+# Acknowledgements & Credits
+
+- Thanks to **Meta** for the Passthrough Camera API and [**Passthrough Camera API Samples**](https://github.com/oculus-samples/Unity-PassthroughCameraApiSamples/).
+- Thanks to shader wizard [Daniel Ilett](https://www.youtube.com/@danielilett) for helping me in the shader samples.
+- Thanks to **[Michael Jahn](https://github.com/micjahn/ZXing.Net/)** for the XZing.Net library used for the QR code tracking samples.
+- Special thanks to [Markus Altenhofer](https://www.linkedin.com/in/markus-altenhofer-176453155/) from [FireDragonGameStudio](https://www.youtube.com/@firedragongamestudio) for contributing the WebRTC sample scene.
+- Special thanks to [Thomas Ratliff](https://x.com/devtom7) for contributing his [shader samples](https://x.com/devtom7/status/1902033672041091453) to the repo.
  
 # License
 
