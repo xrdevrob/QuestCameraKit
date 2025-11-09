@@ -7,7 +7,6 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 - [PCA Samples](#pca-samples)
 - [Update Notes](#update-notes)
 - [Getting Started with PCA](#getting-started-with-pca)
-- [Running the Samples](#running-the-samples)
 - [Troubleshooting & Known Issues](#troubleshooting--known-issues)
 - [Community Contributions](#community-contributions)
 - [News](#news)
