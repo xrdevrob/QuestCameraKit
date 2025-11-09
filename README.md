@@ -288,7 +288,7 @@ Launch Unity and open the cloned project folder.
 3. **Configure Dependencies:**
 Follow the instructions in the section below to run one of the samples.
 
-# Troubleshootingg & Known Issues
+# Troubleshooting & Known Issues
 
 - For sample 7 QR Code Detection, make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
 - If switching betwenn Unity 6 and other versions such as 2023 or 2022 it can happen that your Android Manifest is getting modified and the app won't run anymore. Should this happen to you make sure to go to `Meta > Tools > Update AndroidManifest.xml` or `Meta > Tools > Create store-compatible AndroidManifest.xml`. After that make sure you add back the `horizonos.permission.HEADSET_CAMERA` manually into your manifest file.
