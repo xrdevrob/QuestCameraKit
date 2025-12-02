@@ -57,7 +57,6 @@ public class QrCodeDisplayManager : MonoBehaviour
 
         CleanupInactiveMarkers();
     }
-#endif
 
     private static Vector2 ToViewport(Vector2 uv) => new(Mathf.Clamp01(uv.x), Mathf.Clamp01(uv.y));
 
@@ -224,4 +223,5 @@ public class QrCodeDisplayManager : MonoBehaviour
             _activeMarkers.Remove(key);
         }
     }
+#endif
 }
