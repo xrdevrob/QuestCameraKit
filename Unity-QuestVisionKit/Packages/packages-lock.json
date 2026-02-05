@@ -41,7 +41,7 @@
     },
     "com.unity.ai.inference": {
       "version": "2.3.0",
-      "depth": 1,
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.burst": "1.8.17",
@@ -212,14 +212,6 @@
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
-    },
-    "com.unity.sentis": {
-      "version": "2.2.0",
-      "depth": 0,
-      "source": "builtin",
-      "dependencies": {
-        "com.unity.ai.inference": "2.2.1"
-      }
     },
     "com.unity.shadergraph": {
       "version": "17.2.0",

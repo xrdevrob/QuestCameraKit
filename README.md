@@ -32,16 +32,16 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 ![Color Picker](Media/ColorPicker_Environment.gif)
 
-## 2. 🍎 Object Detection with Unity Sentis
+## 2. 🍎 Object Detection with Unity Inference Engine
 
 - **Purpose:** Convert 2D screen coordinates into their corresponding 3D points in space.
-- **Description:** Use the Unity Sentis framework to infer different ML models to detect and track objects. Learn how to convert detected image coordinates (e.g. bounding boxes) back into 3D points for dynamic interaction within your scenes. In this sample you will also see how to filter labels. This means e.g. you can only detect humans and pets, to create a more safe play-area for your VR game. The sample video below is filtered to monitor, person and laptop. The sample is running at around `60 fps`.
+- **Description:** Use the Unity Inference Engine framework to infer different ML models to detect and track objects. Learn how to convert detected image coordinates (e.g. bounding boxes) back into 3D points for dynamic interaction within your scenes. In this sample you will also see how to filter labels. This means e.g. you can only detect humans and pets, to create a more safe play-area for your VR game. The sample video below is filtered to monitor, person and laptop. The sample is running at around `60 fps`.
 
 <details>
 <summary>How to run this sample</summary>
 
 - Open the `ObjectDetection` scene.
-- Install [Unity Sentis](https://docs.unity3d.com/Packages/com.unity.sentis@2.1/manual/get-started.html) (tested with `com.unity.sentis@2.1.2`).
+- Install [Unity AI Inference](https://docs.unity3d.com/Packages/com.unity.ai.inference@2.3/manual/get-started.html) (use `com.unity.ai.inference@2.3.0`).
 - Select the labels you want to track. Leaving the list empty tracks all objects. <details>
   <summary>Show all available labels</summary>
   <table>
@@ -290,6 +290,7 @@ Follow the instructions in the section below to run one of the samples.
 # Troubleshooting & Known Issues
 
 - For sample 7 QR Code Detection, make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
+- Object Detection uses `Unity.InferenceEngine` with `com.unity.ai.inference@2.3.0`.
 - If switching betwenn Unity 6 and other versions such as 2023 or 2022 it can happen that your Android Manifest is getting modified and the app won't run anymore. Should this happen to you make sure to go to `Meta > Tools > Update AndroidManifest.xml` or `Meta > Tools > Create store-compatible AndroidManifest.xml`. After that make sure you add back the `horizonos.permission.HEADSET_CAMERA` manually into your manifest file.
 
 # Community Contributions
