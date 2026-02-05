@@ -260,10 +260,10 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 > The legacy `WebCamTexture` helpers have been fully retired. Every sample now talks directly to `PassthroughCameraAccess` component, which is part of the MRUK package, and consumes the native render texture, intrinsics, and per-frame pose data. It also offers us timestamps and both eyes at the same time.
 
 - **Single PCA component** – All samples reference the same configured PCA component; no more bespoke permission scripts or manifest edits.
-- **Direct GPU textures** – Sentis inference, QR tracking, Frosted Glass shaders, WebRTC, and OpenAI capture now pull the PCA render texture directly, preserving latency and aspect ratio.
+- **Direct GPU textures** – Inference Engine, QR tracking, Frosted Glass shaders, WebRTC, and OpenAI capture now pull the PCA render texture directly, preserving latency and aspect ratio.
 - **Pose-aware reprojection** – Object/QR samples reconstruct rays with per-frame PCA pose + intrinsics so markers no longer drift when the user nods.
 - **Environment-aware markers** – Marker placement re-samples environment normals and optionally drops detections below a configurable confidence threshold.
-- **Shared marker assets** – Marker prefab/pool/controller moved to `Assets/Samples/Common/Markers`, keeping Sentis + QR samples in sync.
+- **Shared marker assets** – Marker prefab/pool/controller moved to `Assets/Samples/Common/Markers`, keeping inference + QR samples in sync.
 - **Shader updates** – Camera-mapped shaders understand PCA UV scale/offsets so effects don’t mirror, split into quadrants, or flip vertically.
 
 # Getting Started with PCA
