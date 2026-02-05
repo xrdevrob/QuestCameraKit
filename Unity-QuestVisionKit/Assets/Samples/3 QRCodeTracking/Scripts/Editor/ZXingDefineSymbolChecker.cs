@@ -1,8 +1,8 @@
 #if UNITY_EDITOR
+using System;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
-using System.IO;
 using System.Linq;
 
 [InitializeOnLoad]
@@ -61,9 +61,13 @@ public static class ZXingDefineSymbolChecker
 
     private static bool HasZXingDLL()
     {
-        var files = Directory.GetFiles(Application.dataPath, "*ZXing.dll", SearchOption.AllDirectories)
-                             .Concat(Directory.GetFiles(Application.dataPath, "*zxing.dll", SearchOption.AllDirectories));
-        return files.Any();
+        const string typeName = "ZXing.QrCode.QRCodeReader";
+
+        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (asm.GetType(typeName, throwOnError: false) != null) return true;
+        }
+        return false;
     }
 }
 #endif
