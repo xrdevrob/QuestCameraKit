@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: StereoPassthroughFrostedGlass
+  m_Shader: {fileID: 4800000, guid: 697f1f1176ac46b19d299730b3064671, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _LeftTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RightTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BlurRadius: 0.006
+    - _EdgeFeather: 0.03
+    - _PreviewEye: 0
+    - _RefractionNoiseAmount: 0.0025
+    - _RefractionNoiseScale: 120
+    - _TintStrength: 0.22
+    m_Colors:
+    - _LeftUvOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _RightUvOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _Tint: {r: 0.92, g: 0.96, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
