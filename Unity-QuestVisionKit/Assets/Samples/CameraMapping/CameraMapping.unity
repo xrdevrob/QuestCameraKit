@@ -925,7 +925,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 47d5a3bf44a5473fb5705879ed457624, type: 2}
+  - {fileID: 2100000, guid: 0bdf324a8e0a426593d47b734df1bac4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1067,7 +1067,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftCameraAccess: {fileID: 1731017031}
   rightCameraAccess: {fileID: 1731017032}
-  targetMaterial: {fileID: 2100000, guid: 47d5a3bf44a5473fb5705879ed457624, type: 2}
+  targetMaterial: {fileID: 2100000, guid: 0bdf324a8e0a426593d47b734df1bac4, type: 2}
   leftUvOffsetX: 0
   leftUvOffsetY: 0
   rightUvOffsetX: 0
