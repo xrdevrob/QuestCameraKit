@@ -12,7 +12,7 @@
     </activity>
     <meta-data android:name="unityplayer.SkipPermissionsDialog" android:value="false" />
     <meta-data android:name="com.samsung.android.vr.application.mode" android:value="vr_only" />
-    <meta-data android:name="com.oculus.handtracking.frequency" android:value="LOW" />
+    <meta-data android:name="com.oculus.handtracking.frequency" android:value="HIGH" />
     <meta-data android:name="com.oculus.handtracking.version" android:value="V2.0" />
     <meta-data android:name="com.oculus.ossplash.background" android:value="passthrough-contextual" />
     <meta-data android:name="com.oculus.telemetry.project_guid" android:value="3d9c62c9-55e8-4345-9390-4d50ade91971" />
@@ -27,5 +27,4 @@
   <uses-permission android:name="com.oculus.permission.USE_SCENE" />
   <uses-permission android:name="com.oculus.permission.BOUNDARY_VISIBILITY" />
   <uses-permission android:name="android.permission.VIBRATE" />
-  <uses-feature android:name="com.oculus.experimental.enabled" android:required="true" />
 </manifest>

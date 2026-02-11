@@ -16,7 +16,8 @@ MonoBehaviour:
     keys:
     - Meta.XR.SDK.UsageSettings.UsesProjectSetupTool
     - Meta.XR.SDK.UsageSettings.UsesBuildingBlocks
-    values: 0101
+    - Meta.XR.SDK.UsageSettings.UsesImmersiveDebugger
+    values: 010101
   intProperties:
     keys: []
     values: 
