@@ -1,14 +1,13 @@
 {
   "dependencies": {
-    "com.meta.xr.mrutilitykit": "81.0.0",
-    "com.meta.xr.sdk.core": "81.0.0",
-    "com.meta.xr.sdk.interaction.ovr": "81.0.0",
+    "com.meta.xr.mrutilitykit": "83.0.4",
+    "com.meta.xr.sdk.core": "83.0.4",
+    "com.unity.ai.inference": "2.3.0",
     "com.unity.ide.rider": "3.0.38",
     "com.unity.ide.visualstudio": "2.0.23",
     "com.unity.inputsystem": "1.14.2",
     "com.unity.mobile.android-logcat": "1.4.6",
     "com.unity.render-pipelines.universal": "17.2.0",
-    "com.unity.ai.inference": "2.3.0",
     "com.unity.ugui": "2.0.0",
     "com.unity.xr.management": "4.5.1",
     "com.unity.xr.meta-openxr": "2.2.1",
