@@ -82,15 +82,15 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 ## 4. 🪟 Shader Samples
 
-- **Purpose:** Apply a custom shader effect to virtual surfaces.
-- **Description:** A shader which takes our camera feed as input to manipulate the content behind it. Right now the project contains a Pixelate, Refract, Water, Zoom, Blur, GameBoy Green and VirtualBoy Red effect. Additionally examples for colorblindness red, green, blue and total have been added (Protanopia, Deuteranopia, Tritanopia, Achromatopsia). Frosted Glass shader is work in progress!
+- **Purpose:** Apply stereo passthrough camera-mapped shader effects to virtual surfaces.
+- **Description:** The shader sample is now consolidated into one scene that uses left/right passthrough feeds and per-eye calibration data. Current materials and shaders included in this flow are `StereoPassthroughCameraMapping`, `StereoPassthroughFrostedGlass`, and `StereoPassthroughWavyPortal`.
 
 <details>
 <summary>How to run this sample</summary>
 
-- Open the `Shader Samples` scene or the WIP Frosted Glass scene.
-- Ensure the shared PCA prefab is present in the scene root.
-- Toggle the different shader GameObjects to see Pixelate, Water, Zoom, Blur, GameBoy, VirtualBoy, and colorblindness filters mapped onto PCA textures.
+- Open the `CameraMappingForShaders` scene.
+- Make sure your passthrough setup is active and the scene has both left and right `PassthroughCameraAccess` components.
+- Build to Quest and run. Interact with the sample objects using the stereo shader materials to test camera mapping, frosted glass, and wavy portal effects.
 
 </details>
 
@@ -254,6 +254,16 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 ![Shader Samples](Media/QrCodeDetection.png)
 
 # Update Notes
+
+## Shader sample consolidation
+
+> Camera-mapping and shader content has been consolidated for easier maintenance and a cleaner project structure.
+
+- New primary shader scene: `Unity-QuestVisionKit/Assets/Samples/4 Shaders/CameraMappingForShaders.unity`
+- Legacy folders/scenes removed:
+  - `Unity-QuestVisionKit/Assets/Samples/CameraMapping/`
+  - `Unity-QuestVisionKit/Assets/Samples/4 Shaders/FrostedGlass WIP/`
+  - `Unity-QuestVisionKit/Assets/Samples/4 Shaders/Shader Samples.unity`
 
 ## Meta XR SDK v81 refresh - One script to rule them all
 
