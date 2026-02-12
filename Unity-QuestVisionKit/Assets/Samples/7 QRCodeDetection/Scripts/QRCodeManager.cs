@@ -37,7 +37,7 @@ namespace Meta.XR.MRUtilityKitSamples.QRCodeDetection
         public const string ScenePermission = OVRPermissionsRequester.ScenePermission;
 
         public static bool IsSupported
-            => OVRAnchor.TrackerConfiguration.QRCodeTrackingSupported;
+            => s_instance && s_instance._mrukInstance && s_instance._mrukInstance.QRCodeTrackingSupported;
 
         public static bool HasPermissions
 #if UNITY_EDITOR

@@ -1,0 +1,54 @@
+/*
+* Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * Licensed under the Oculus SDK License Agreement (the "License");
+ * you may not use the Oculus SDK except in compliance with the License,
+ * which is provided at the time of installation or download, or which
+ * otherwise accompanies this software in either electronic or hard copy form.
+ *
+ * You may obtain a copy of the License at
+ *
+ * https://developer.oculus.com/licenses/oculussdk/
+ *
+ * Unless required by applicable law or agreed to in writing, the Oculus SDK
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Turns the headset’s depth image into a flat list of real‑world distance values on the GPU.
+
+#pragma kernel CopyDepth
+
+Texture2DArray<float> _EnvironmentDepthTexture;
+float _EnvironmentDepthTextureSize;
+float4 _EnvironmentDepthZBufferParams;
+RWStructuredBuffer<float> _CopiedDepthTexture;
+
+[numthreads(32, 32, 1)]
+void CopyDepth(uint3 id : SV_DispatchThreadID) {
+  static const uint textureSize = 320;
+  static const uint numThreads = 32;
+  static const uint iterationsPerThread = textureSize / numThreads;
+  const float downscale = _EnvironmentDepthTextureSize / textureSize;
+
+  const uint x = id.x * iterationsPerThread;
+  const uint y = id.y * iterationsPerThread;
+  for (uint i = 0; i < iterationsPerThread; i++) {
+    for (uint j = 0; j < iterationsPerThread; j++) {
+      [unroll]
+      for (uint eyeIndex = 0; eyeIndex < 2; eyeIndex++) {
+        const uint targetIndex = x + i + (y + j) * textureSize + textureSize * textureSize *
+            eyeIndex;
+        const float2 texCoords = float2((x + i) * downscale, (y + j) * downscale);
+        const float rawDepth = _EnvironmentDepthTexture[float3(texCoords, eyeIndex)];
+        const float ndcDepth = rawDepth * 2.0f - 1.0f;
+        const float linearDepth = (1.0f / (ndcDepth + _EnvironmentDepthZBufferParams.y)) *
+            _EnvironmentDepthZBufferParams.x;
+        _CopiedDepthTexture[targetIndex] = linearDepth;
+      }
+    }
+  }
+}
