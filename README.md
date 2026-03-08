@@ -30,7 +30,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![Color Picker](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/ColorPicker_Environment.gif)
+![Color Picker](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/befec3b/Media/ColorPicker_Environment.gif)
 
 ## 2. 🍎 Object Detection with Unity Inference Engine
 
@@ -61,7 +61,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![Object Detection](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/ObjectDetection.gif)
+![Object Detection](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/befec3b/Media/ObjectDetection.gif)
 
 ## 3. 📱 QR Code Tracking with ZXing
 
@@ -78,7 +78,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![QR Code Tracking](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/QRCodeTracking.gif)
+![QR Code Tracking](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/befec3b/Media/QRCodeTracking.gif)
 
 ## 4. 🪟 Shader Samples
 
@@ -94,7 +94,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![Shader Samples](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/ShaderSamples.gif)
+![Shader Samples](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/befec3b/Media/ShaderSamples.gif)
 
 ## 5. 🧠 OpenAI vision model
 
@@ -234,7 +234,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
 </details>
 
-![PCA WebRTC](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/PCA_WebRTC.gif)
+![PCA WebRTC](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/befec3b/Media/PCA_WebRTC.gif)
 
 ## 7. 📅 Experimental QR Code detection
 
@@ -251,7 +251,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
 </details>
 
-![Shader Samples](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/QrCodeDetection.png)
+![Shader Samples](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/befec3b/Media/QrCodeDetection.png)
 
 # Update Notes
 
@@ -307,7 +307,7 @@ Follow the instructions in the section below to run one of the samples.
 
 To keep clone sizes low and avoid Git LFS quota issues, new README showcase
 media should be hosted externally and referenced by URL. The current README
-showcase media is pinned to commit `8a7c234` so it can still render after these
+showcase media is pinned to commit `befec3b` so it can still render after these
 large files are removed from the current checkout. See
 [`docs/media-hosting.md`](docs/media-hosting.md) for the recommended pattern.
 
