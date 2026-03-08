@@ -87,43 +87,9 @@ Assets/Plugins/**       linguist-vendored
 *.stl                   lfs
 *.ztl                   lfs
 
-# Audio
-*.aif                   lfs
-*.aiff                  lfs
-*.it                    lfs
-*.mod                   lfs
-*.mp3                   lfs
-*.ogg                   lfs
-*.s3m                   lfs
-*.wav                   lfs
-*.xm                    lfs
-
-# Video
-*.asf                   lfs
-*.avi                   lfs
-*.flv                   lfs
-*.mov                   lfs
-*.mp4                   lfs
-*.mpeg                  lfs
-*.mpg                   lfs
-*.ogv                   lfs
-*.wmv                   lfs
-
-# Images
-*.bmp                   lfs
-*.exr                   lfs
-*.gif                   lfs
-*.hdr                   lfs
-*.iff                   lfs
-*.jpeg                  lfs
-*.jpg                   lfs
-*.pict                  lfs
-*.png                   lfs
-*.psd                   lfs
-*.tga                   lfs
-*.tif                   lfs
-*.tiff                  lfs
-*.webp                  lfs
+# Audio / video / images are intentionally *not* tracked in LFS.
+# README showcase media should live as release assets or other external URLs so
+# clones do not have to pull them. Keep only lightweight thumbnails in-repo.
 
 # Compressed Archive
 *.7z                    lfs
@@ -138,16 +104,9 @@ Assets/Plugins/**       linguist-vendored
 *.pdb                   lfs
 *.so                    lfs
 
-# Fonts
-*.otf                   lfs
-*.ttf                   lfs
-
 # Executable/Installer
 *.apk                   lfs
 *.exe                   lfs
-
-# Documents
-*.pdf                   lfs
 
 # ETC
 *.a                     lfs
