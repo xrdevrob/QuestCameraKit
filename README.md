@@ -30,7 +30,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![Color Picker](Media/ColorPicker_Environment.gif)
+![Color Picker](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/ColorPicker_Environment.gif)
 
 ## 2. 🍎 Object Detection with Unity Inference Engine
 
@@ -61,7 +61,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![Object Detection](Media/ObjectDetection.gif)
+![Object Detection](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/ObjectDetection.gif)
 
 ## 3. 📱 QR Code Tracking with ZXing
 
@@ -78,7 +78,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![QR Code Tracking](Media/QRCodeTracking.gif)
+![QR Code Tracking](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/QRCodeTracking.gif)
 
 ## 4. 🪟 Shader Samples
 
@@ -94,7 +94,7 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 </details>
 
-![Shader Samples](Media/ShaderSamples.gif)
+![Shader Samples](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/ShaderSamples.gif)
 
 ## 5. 🧠 OpenAI vision model
 
@@ -234,7 +234,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
 </details>
 
-![PCA WebRTC](Media/PCA_WebRTC.gif)
+![PCA WebRTC](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/PCA_WebRTC.gif)
 
 ## 7. 📅 Experimental QR Code detection
 
@@ -251,7 +251,7 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
 </details>
 
-![Shader Samples](Media/QrCodeDetection.png)
+![Shader Samples](https://raw.githubusercontent.com/xrdevrob/QuestCameraKit/8a7c234868b7ca84174e971092b789d1b4fbb8cd/Media/QrCodeDetection.png)
 
 # Update Notes
 
@@ -302,6 +302,14 @@ Follow the instructions in the section below to run one of the samples.
 - For sample 7 QR Code Detection, make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
 - Object Detection uses `Unity.InferenceEngine` with `com.unity.ai.inference@2.3.0`.
 - If switching betwenn Unity 6 and other versions such as 2023 or 2022 it can happen that your Android Manifest is getting modified and the app won't run anymore. Should this happen to you make sure to go to `Meta > Tools > Update AndroidManifest.xml` or `Meta > Tools > Create store-compatible AndroidManifest.xml`. After that make sure you add back the `horizonos.permission.HEADSET_CAMERA` manually into your manifest file.
+
+# README Media Hosting
+
+To keep clone sizes low and avoid Git LFS quota issues, new README showcase
+media should be hosted externally and referenced by URL. The current README
+showcase media is pinned to commit `8a7c234` so it can still render after these
+large files are removed from the current checkout. See
+[`docs/media-hosting.md`](docs/media-hosting.md) for the recommended pattern.
 
 # Community Contributions
 
