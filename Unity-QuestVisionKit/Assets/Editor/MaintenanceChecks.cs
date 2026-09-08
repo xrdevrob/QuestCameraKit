@@ -42,6 +42,7 @@ namespace QuestCameraKit.Editor
             Require(SampleMenu.Label("Assets/Samples/3 QRCodeDetection/QRCodeDetection.unity") == "QR tracking (Meta native)",
                 "Native QR must be clearly distinguished from the raw-camera sample.");
             Require(SampleMenu.AvailableScenes().Length == 6 && !SampleMenu.AvailableScenes().Any(path => path.Contains("WebRTC-SingleClient")), "The combined build must contain all six headset samples.");
+            CheckNativeQrBounds();
             CheckWavStereo();
             CheckModelContract();
             var escape = typeof(ImageOpenAIConnector).GetMethod("EscapeJson", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -58,6 +59,34 @@ namespace QuestCameraKit.Editor
             }
             finally { Object.DestroyImmediate(owner); }
             Debug.Log("PASS: QuestCameraKit maintenance regression checks.");
+        }
+
+        private static void CheckNativeQrBounds()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Samples/3 QRCodeDetection/Prefabs/QRCodePrefab.prefab");
+            Require(prefab, "Native QR overlay prefab must exist.");
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            try
+            {
+                var visualizer = instance.GetComponent<Meta.XR.MRUtilityKitSamples.QRCodeDetection.Bounded2DVisualizer>();
+                var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+                var type = visualizer.GetType();
+                var line = (LineRenderer)type.GetField("_lineRenderer", flags).GetValue(visualizer);
+                var canvas = (RectTransform)type.GetField("_canvasRect", flags).GetValue(visualizer);
+                var update = type.GetMethod("SetBounds", flags);
+                Require(line && canvas, "Native QR prefab needs its boundary and payload canvas.");
+                update.Invoke(visualizer, new object[] { null });
+                Require(!line.enabled && !canvas.gameObject.activeSelf, "Missing native bounds must hide the overlay.");
+                update.Invoke(visualizer, new object[] { new Rect(1, 2, 3, 4) });
+                Require(line.enabled && canvas.gameObject.activeSelf && line.positionCount == 4 &&
+                    line.GetPosition(0) == new Vector3(1, 2, 0) && line.GetPosition(2) == new Vector3(4, 6, 0),
+                    "Native bounds must draw the correct rectangle immediately after becoming available.");
+                update.Invoke(visualizer, new object[] { null });
+                Require(!line.enabled && !canvas.gameObject.activeSelf, "Losing native bounds must hide stale geometry.");
+                Debug.Log("PASS: native QR overlay handles missing, available, and lost bounds.");
+            }
+            finally { Object.DestroyImmediate(instance); }
         }
 
         private static void CheckModelContract()
