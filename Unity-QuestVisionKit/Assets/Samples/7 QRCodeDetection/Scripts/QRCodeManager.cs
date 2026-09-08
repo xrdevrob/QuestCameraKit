@@ -37,7 +37,7 @@ namespace Meta.XR.MRUtilityKitSamples.QRCodeDetection
         public const string ScenePermission = OVRPermissionsRequester.ScenePermission;
 
         public static bool IsSupported
-            => OVRAnchor.TrackerConfiguration.QRCodeTrackingSupported;
+            => MRUK.Instance && MRUK.Instance.QRCodeTrackingSupported;
 
         public static bool HasPermissions
 #if UNITY_EDITOR
@@ -172,8 +172,15 @@ namespace Meta.XR.MRUtilityKitSamples.QRCodeDetection
             _mrukInstance.SceneSettings.TrackableRemoved.AddListener(OnTrackableRemoved);
         }
 
-        void OnDestroy()
-            => s_instance = null;
+        void OnDisable()
+        {
+            if (_mrukInstance)
+            {
+                _mrukInstance.SceneSettings.TrackableAdded.RemoveListener(OnTrackableAdded);
+                _mrukInstance.SceneSettings.TrackableRemoved.RemoveListener(OnTrackableRemoved);
+            }
+            if (s_instance == this) s_instance = null;
+        }
 
 
         //

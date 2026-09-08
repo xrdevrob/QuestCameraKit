@@ -50,7 +50,7 @@ public static class ZXingDefineSymbolChecker
                 }
 
                 var newDefines = string.Join(";", defineList);
-                PlayerSettings.SetScriptingDefineSymbols(target, newDefines);
+                if (newDefines != defines) PlayerSettings.SetScriptingDefineSymbols(target, newDefines);
             }
             catch (System.Exception ex)
             {

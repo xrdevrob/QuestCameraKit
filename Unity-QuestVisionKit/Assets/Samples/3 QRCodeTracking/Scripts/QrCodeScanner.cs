@@ -38,6 +38,9 @@ public class QrCodeScanner : MonoBehaviour
     private ComputeShader _downsampleShader;
     private QRCodeReader _qrReader;
     private bool _isScanning;
+    private DateTime _lastScannedTimestamp;
+    public int CompletedScanCount { get; private set; }
+    public int DecodedCodeCount { get; private set; }
     
     private static readonly int Input1 = Shader.PropertyToID("_Input");
     private static readonly int Output = Shader.PropertyToID("_Output");
@@ -76,12 +79,12 @@ public class QrCodeScanner : MonoBehaviour
 
     public async Task<QrCodeResult[]> ScanFrameAsync()
     {
-        if (_isScanning || !_downsampleShader) return Array.Empty<QrCodeResult>();
+        if (_isScanning || !isActiveAndEnabled || !_downsampleShader) return Array.Empty<QrCodeResult>();
 
         _isScanning = true;
         try
         {
-            var frame = await AcquireFrameAsync();
+            var frame = AcquireFrame();
             if (frame == null)
             {
                 return Array.Empty<QrCodeResult>();
@@ -95,13 +98,23 @@ public class QrCodeScanner : MonoBehaviour
 
             DispatchDownsample(frame.Value.Texture, targetWidth, targetHeight);
             var grayBytes = await ReadPixelsAsync(_downsampledTexture);
-            if (grayBytes == null || grayBytes.Length == 0)
+            if (!this || !isActiveAndEnabled || grayBytes == null || grayBytes.Length == 0)
             {
                 return Array.Empty<QrCodeResult>();
             }
 
             var decoded = await Task.Run(() => DecodeFrame(frame.Value, grayBytes, targetWidth, targetHeight));
-            return decoded ?? Array.Empty<QrCodeResult>();
+            if (this && isActiveAndEnabled)
+            {
+                CompletedScanCount++;
+                DecodedCodeCount += decoded?.Length ?? 0;
+            }
+            return this && isActiveAndEnabled ? decoded ?? Array.Empty<QrCodeResult>() : Array.Empty<QrCodeResult>();
+        }
+        catch (Exception e)
+        {
+            if (this && isActiveAndEnabled) Debug.LogWarning("[QrCodeScanner] Scan failed: " + e.Message);
+            return Array.Empty<QrCodeResult>();
         }
         finally
         {
@@ -111,12 +124,7 @@ public class QrCodeScanner : MonoBehaviour
 
     private QrCodeResult ProcessDecodeResult(Result decodeResult, int targetWidth, int targetHeight, CaptureFrame frame)
     {
-        var points = decodeResult.ResultPoints;
-        var uvCorners = new Vector3[points.Length];
-        for (var i = 0; i < points.Length; i++)
-        {
-            uvCorners[i] = new Vector3(points[i].X / targetWidth, points[i].Y / targetHeight, 0);
-        }
+        var uvCorners = GetFinderCorners(decodeResult.ResultPoints, targetWidth, targetHeight);
 
         return new QrCodeResult
         {
@@ -146,26 +154,32 @@ public class QrCodeScanner : MonoBehaviour
         return tcs.Task;
     }
 
-    private async Task<CaptureFrame?> AcquireFrameAsync()
+    private CaptureFrame? AcquireFrame()
     {
-        while (true)
+        if (!_cameraAccess || !_cameraAccess.IsPlaying || _lastScannedTimestamp == _cameraAccess.Timestamp) return null;
+        var texture = _cameraAccess.GetTexture();
+        if (!texture) return null;
+        _lastScannedTimestamp = _cameraAccess.Timestamp;
+        return new CaptureFrame
         {
-            if (_cameraAccess && _cameraAccess.IsPlaying)
-            {
-                var texture = _cameraAccess.GetTexture();
-                if (texture)
-                {
-                    return new CaptureFrame
-                    {
-                        Texture = texture,
-                        Pose = _cameraAccess.GetCameraPose(),
-                        Intrinsics = _cameraAccess.Intrinsics,
-                        Resolution = _cameraAccess.CurrentResolution
-                    };
-                }
-            }
-            await Task.Delay(16);
-        }
+            Texture = texture,
+            Pose = _cameraAccess.GetCameraPose(),
+            Intrinsics = _cameraAccess.Intrinsics,
+            Resolution = _cameraAccess.CurrentResolution
+        };
+    }
+
+    // ZXing returns BL, TL, TR finder centres and sometimes an alignment point,
+    // not four boundary corners. Keep a consistent winding for every QR version.
+    internal static Vector3[] GetFinderCorners(ResultPoint[] points, int width, int height)
+    {
+        if (points == null || points.Length < 3 || width <= 0 || height <= 0)
+            return Array.Empty<Vector3>();
+        var bottomLeft = new Vector3(points[0].X / width, points[0].Y / height, 0f);
+        var topLeft = new Vector3(points[1].X / width, points[1].Y / height, 0f);
+        var topRight = new Vector3(points[2].X / width, points[2].Y / height, 0f);
+        // ponytail: affine finder quadrilateral; use detector homography for exact perspective boundaries.
+        return new[] { bottomLeft, topLeft, topRight, bottomLeft + topRight - topLeft };
     }
 
     private (int width, int height) GetTargetDimensions(Texture texture)
@@ -184,6 +198,7 @@ public class QrCodeScanner : MonoBehaviour
         if (_downsampledTexture)
         {
             _downsampledTexture.Release();
+            Destroy(_downsampledTexture);
         }
 
         _downsampledTexture = new RenderTexture(width, height, 0, RenderTextureFormat.R8)

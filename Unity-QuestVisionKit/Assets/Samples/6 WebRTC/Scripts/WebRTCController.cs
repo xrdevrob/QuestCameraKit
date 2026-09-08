@@ -21,7 +21,13 @@ namespace QuestCameraKit.WebRTC {
 
         private IEnumerator Start() {
             cameraAccess = ResolveCameraAccess(cameraAccess);
-            yield return new WaitUntil(() => cameraAccess && cameraAccess.IsPlaying);
+            if (!cameraAccess || !connectionGameObject || !canvasRawImage) {
+                Debug.LogError("[WebRTCController] Assign camera, connection and preview references.");
+                enabled = false;
+                yield break;
+            }
+            _webRTCConnection = connectionGameObject.GetComponent<WebRTCConnection>();
+            yield return new WaitUntil(() => !cameraAccess || cameraAccess.IsPlaying);
             if (!cameraAccess) {
                 Debug.LogWarning("[WebRTCController] Passthrough camera unavailable.");
                 yield break;
@@ -33,13 +39,16 @@ namespace QuestCameraKit.WebRTC {
         }
 
         private void Update() {
-            if (OVRInput.Get(OVRInput.Button.Start)) {
+            if (!_webRTCConnection || !cameraAccess || !cameraAccess.IsPlaying) return;
+            canvasRawImage.texture = cameraAccess.GetTexture();
+
+            if (OVRInput.GetDown(OVRInput.Button.Start)) {
                 _webRTCConnection.StartVideoTransmission();
             }
 
-            if (adaptFovToCustomValue && streamingCameras[0].fieldOfView != customFovValue) {
+            if (adaptFovToCustomValue && streamingCameras != null) {
                 foreach (var camera in streamingCameras) {
-                    camera.fieldOfView = customFovValue;
+                    if (camera) camera.fieldOfView = Mathf.Clamp(customFovValue, 1f, 179f);
                 }
             }
 

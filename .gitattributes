@@ -118,3 +118,12 @@ Assets/Plugins/**       linguist-vendored
 
 # Exceptions for .asset files such as lightning pre-baking
 LightingData.asset     binary
+
+# Small runtime dependency is checked in so QR tracking works on a fresh clone.
+Unity-QuestVisionKit/Assets/Plugins/ZXing/zxing.dll binary -filter
+
+# Pin the small development-only Quak release without another LFS download.
+Unity-QuestVisionKit/Packages/com.xrdevrob.quak-0.4.0-alpha.1.tgz binary -filter
+
+# Imported copy of the same pinned Quak development layer for fresh-clone builds.
+Unity-QuestVisionKit/Assets/XR/APILayers~/AndroidLayers/arm64/libXrApiLayer_QUAK_injection.so binary -filter

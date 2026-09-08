@@ -75,6 +75,14 @@ namespace QuestCameraKit.OpenAI
                 }
             }
 
+            if (capturedTexture && capturedTexture != dummyImage)
+            {
+                // SendImage encodes before its first yield; it no longer needs the captured texture.
+                if (imageConnector) imageConnector.SendImage(capturedTexture, transcription);
+                Destroy(capturedTexture);
+                yield break;
+            }
+
             if (imageConnector)
             {
                 imageConnector.SendImage(capturedTexture, transcription);
@@ -111,7 +119,7 @@ namespace QuestCameraKit.OpenAI
             }
 
             var colors = access.GetColors();
-            if (!colors.IsCreated)
+            if (!colors.IsCreated || colors.Length != resolution.x * resolution.y)
             {
                 return null;
             }

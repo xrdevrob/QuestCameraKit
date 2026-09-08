@@ -10,10 +10,10 @@ namespace QuestCameraKit.CameraMapping
         [SerializeField] private PassthroughCameraAccess rightCameraAccess;
         [SerializeField] private Material targetMaterial;
         [Header("Per-Eye UV Offset")]
-        [SerializeField, Range(-0.2f, 0f)] private float leftUvOffsetX;
-        [SerializeField, Range(-0.2f, 0f)] private float leftUvOffsetY;
-        [SerializeField, Range(-0.2f, 0f)] private float rightUvOffsetX;
-        [SerializeField, Range(-0.2f, 0f)] private float rightUvOffsetY;
+        [SerializeField, Range(-0.2f, 0.2f)] private float leftUvOffsetX;
+        [SerializeField, Range(-0.2f, 0.2f)] private float leftUvOffsetY;
+        [SerializeField, Range(-0.2f, 0.2f)] private float rightUvOffsetX;
+        [SerializeField, Range(-0.2f, 0.2f)] private float rightUvOffsetY;
 
         private static readonly int LeftTexId = Shader.PropertyToID("_LeftTex");
         private static readonly int RightTexId = Shader.PropertyToID("_RightTex");

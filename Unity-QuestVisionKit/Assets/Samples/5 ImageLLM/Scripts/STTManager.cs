@@ -1,233 +1,187 @@
 using System;
-using System.IO;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Events;
-using System.Threading.Tasks;
-using UnityEngine.Networking;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 
 namespace QuestCameraKit.OpenAI
 {
     public class SttManager : MonoBehaviour
     {
         public event Action<string> OnTranscriptionComplete;
-
         [Header("STT Settings")]
-        [SerializeField] private int recordingMaximum = 5;
-
+        [SerializeField, Min(1)] private int recordingMaximum = 5;
         [Header("Canvas Settings")]
         [SerializeField] private bool useCanvas = true;
-
         [Header("UI Components (Optional)")]
         [SerializeField] private Button recordButton;
         [SerializeField] private Text transcriptionText;
         [SerializeField] private Dropdown microphoneDropdown;
-
         [Header("Events")] public UnityEvent onRequestStarted;
         public UnityEvent onRequestSent;
 
         private ImageOpenAIConnector _imageOpenAIConnector;
         private AudioClip _clip;
-        private string _apiKey = "YOUR_OPENAI_API_KEY";
-        private const string FileName = "output.wav";
+        private string _selectedMic;
         private bool _isRecording;
+        private bool _isSending;
         private float _time;
+        private UnityWebRequest _request;
 
         private void Start()
         {
             _imageOpenAIConnector = FindAnyObjectByType<ImageOpenAIConnector>();
-            _apiKey = _imageOpenAIConnector.apiKey;
-
-            if (useCanvas)
+            if (!_imageOpenAIConnector)
             {
-                if (microphoneDropdown != null)
-                {
-                    foreach (var device in Microphone.devices)
-                    {
-                        microphoneDropdown.options.Add(new Dropdown.OptionData(device));
-                    }
-
-                    microphoneDropdown.onValueChanged.AddListener(ChangeMicrophone);
-                }
-
-                if (recordButton != null)
-                {
-                    recordButton.onClick.AddListener(ToggleRecording);
-                }
+                Debug.LogError("SttManager requires an ImageOpenAIConnector.");
+                enabled = false;
+                return;
             }
+            if (useCanvas && microphoneDropdown)
+            {
+                microphoneDropdown.ClearOptions();
+                microphoneDropdown.AddOptions(new List<string>(Microphone.devices));
+                microphoneDropdown.SetValueWithoutNotify(Mathf.Clamp(
+                    PlayerPrefs.GetInt("user-mic-device-index", 0), 0, Mathf.Max(0, Microphone.devices.Length - 1)));
+                microphoneDropdown.onValueChanged.AddListener(ChangeMicrophone);
+            }
+            if (useCanvas && recordButton) recordButton.onClick.AddListener(ToggleRecording);
         }
 
-        private void ChangeMicrophone(int index)
-        {
-            PlayerPrefs.SetInt("user-mic-device-index", index);
-        }
+        private void ChangeMicrophone(int index) => PlayerPrefs.SetInt("user-mic-device-index", index);
 
-        /// <summary>
-        /// Toggles recording on or off.
-        /// </summary>
         private void ToggleRecording()
         {
-            if (_isRecording)
-            {
-                EndRecording();
-            }
-            else
-            {
-                StartRecording();
-            }
+            if (!isActiveAndEnabled || _isSending) return;
+            if (_isRecording) EndRecording();
+            else StartRecording();
         }
 
         private void StartRecording()
         {
-            onRequestStarted.Invoke();
-            _isRecording = true;
-            _time = 0;
-            if (useCanvas && transcriptionText)
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (!UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Microphone))
             {
-                transcriptionText.text = "Recording...";
-            }
-
-            var index = PlayerPrefs.GetInt("user-mic-device-index", 0);
-            string selectedMic = "";
-            if (useCanvas && microphoneDropdown && microphoneDropdown.options.Count > index)
-            {
-                selectedMic = microphoneDropdown.options[index].text;
-            }
-            else
-            {
-                if (Microphone.devices.Length > 0)
-                {
-                    selectedMic = Microphone.devices[0];
-                }
-                else
-                {
-                    Debug.LogError("No microphone devices found!");
-                    if (useCanvas && transcriptionText)
-                    {
-                        transcriptionText.text = "No microphone found!";
-                    }
-                    
-                    _isRecording = false;
-                    return;
-                }
-            }
-
-            if (!Microphone.devices.Contains(selectedMic))
-            {
-                Debug.LogWarning("Selected microphone not found, using default.");
-                selectedMic = Microphone.devices[0];
-            }
-
-            _clip = Microphone.Start(selectedMic, false, recordingMaximum, 44100);
-
-            if (_clip)
-            {
+                var callbacks = new UnityEngine.Android.PermissionCallbacks();
+                callbacks.PermissionGranted += _ => { if (this && isActiveAndEnabled) StartRecording(); };
+                callbacks.PermissionDenied += _ => { if (this) SetStatus("Microphone permission denied."); };
+                UnityEngine.Android.Permission.RequestUserPermission(UnityEngine.Android.Permission.Microphone, callbacks);
                 return;
             }
-
-            Debug.LogError("Failed to start microphone recording!");
-            if (useCanvas && transcriptionText)
+#endif
+            if (_isRecording || _isSending) return;
+            var devices = Microphone.devices;
+            if (devices.Length == 0)
             {
-                transcriptionText.text = "Mic recording failed!";
+                SetStatus("No microphone found.");
+                return;
             }
-            
-            _isRecording = false;
-            if (useCanvas && recordButton)
+            var index = useCanvas && microphoneDropdown
+                ? microphoneDropdown.value : PlayerPrefs.GetInt("user-mic-device-index", 0);
+            _selectedMic = devices[Mathf.Clamp(index, 0, devices.Length - 1)];
+            _clip = Microphone.Start(_selectedMic, false, Mathf.Max(1, recordingMaximum), 44100);
+            if (!_clip)
             {
-                recordButton.interactable = true;
+                SetStatus("Could not start microphone.");
+                return;
             }
+            _time = 0f;
+            _isRecording = true;
+            SetStatus("Recording...");
+            onRequestStarted?.Invoke();
         }
 
         private async void EndRecording()
         {
-            if (!_isRecording)
-                return;
-
-            onRequestSent.Invoke();
+            if (!_isRecording) return;
+            var frames = Microphone.GetPosition(_selectedMic);
+            // A non-looping recording can report zero once its full buffer has stopped.
+            if (frames <= 0 && _clip && _time >= Mathf.Max(1, recordingMaximum)) frames = _clip.samples;
+            Microphone.End(_selectedMic);
             _isRecording = false;
-            if (useCanvas && transcriptionText)
+            _isSending = true;
+            if (useCanvas && recordButton) recordButton.interactable = false;
+            try
             {
-                transcriptionText.text = "Processing...";
+                if (!_clip || frames <= 0) throw new InvalidOperationException("No audio was recorded.");
+                var audio = SaveWav.Save("output.wav", _clip, frames);
+                Destroy(_clip);
+                _clip = null;
+                SetStatus("Processing...");
+                onRequestSent?.Invoke();
+                var transcription = await SendToOpenAI(audio);
+                if (!this || !isActiveAndEnabled) return;
+                _imageOpenAIConnector.StopProcessingSound("");
+                SetStatus(transcription);
+                if (!string.IsNullOrWhiteSpace(transcription)) OnTranscriptionComplete?.Invoke(transcription);
             }
-            Microphone.End(null);
-
-            if (!_clip)
+            catch (Exception e)
             {
-                Debug.LogError("AudioClip is null! Cannot save.");
-                if (useCanvas && transcriptionText)
+                if (this && isActiveAndEnabled)
                 {
-                    transcriptionText.text = "Recording failed!";
+                    if (_imageOpenAIConnector) _imageOpenAIConnector.StopProcessingSound("");
+                    SetStatus("Transcription failed: " + e.Message);
+                    Debug.LogWarning("Transcription failed: " + e.Message);
                 }
-
-                if (useCanvas && recordButton)
+            }
+            finally
+            {
+                _isSending = false;
+                if (this)
                 {
-                    recordButton.interactable = true;
+                    if (_clip) Destroy(_clip);
+                    _clip = null;
+                    if (useCanvas && recordButton) recordButton.interactable = true;
                 }
-                return;
             }
-
-            byte[] audioData = SaveWav.Save(FileName, _clip);
-            string transcription = await SendToOpenAI(audioData);
-
-            if (useCanvas && transcriptionText)
-            {
-                transcriptionText.text = transcription;
-            }
-
-            if (useCanvas && recordButton)
-            {
-                recordButton.interactable = true;
-            }
-
-            OnTranscriptionComplete?.Invoke(transcription);
         }
 
         private async Task<string> SendToOpenAI(byte[] audioData)
         {
-            var url = "https://api.openai.com/v1/audio/transcriptions";
-
-            if (audioData == null || audioData.Length == 0)
+            if (audioData == null || audioData.Length == 0 || audioData.Length > 25 * 1024 * 1024)
+                throw new InvalidOperationException("Recording must contain between 1 byte and 25 MB.");
+            if (!_imageOpenAIConnector || !_imageOpenAIConnector.HasApiKey)
+                throw new InvalidOperationException("Configure an API key before transcribing audio.");
+            var form = new List<IMultipartFormSection>
             {
-                Debug.LogError("SendToOpenAI: Audio data is empty or null.");
-                return "Error: Audio file is empty.";
-            }
-
-            if (audioData.Length > 25 * 1024 * 1024)
-            {
-                Debug.LogError("SendToOpenAI: Audio file is too large.");
-                return "Error: File too large.";
-            }
-
-            var filePath = Path.Combine(Application.persistentDataPath, FileName);
-            await File.WriteAllBytesAsync(filePath, audioData);
-
-            using var request = UnityWebRequest.PostWwwForm(url, "POST");
-            request.SetRequestHeader("Authorization", "Bearer " + _apiKey);
-
-            var formData = new List<IMultipartFormSection>
-            {
-                new MultipartFormFileSection("file", audioData, FileName, "audio/wav"),
-                new MultipartFormDataSection("model", "whisper-1")
+                new MultipartFormFileSection("file", audioData, "output.wav", "audio/wav"),
+                new MultipartFormDataSection("model", "whisper-1"),
+                new MultipartFormDataSection("response_format", "text")
             };
+            using var request = UnityWebRequest.Post("https://api.openai.com/v1/audio/transcriptions", form);
+            request.timeout = 60;
+            request.SetRequestHeader("Authorization", "Bearer " + _imageOpenAIConnector.apiKey);
+            _request = request;
+            try
+            {
+                await request.SendWebRequest();
+                if (request.result != UnityWebRequest.Result.Success)
+                    throw new InvalidOperationException($"HTTP {request.responseCode}: {request.error}");
+                return request.downloadHandler.text.Trim();
+            }
+            finally { _request = null; }
+        }
 
-            var boundary = UnityWebRequest.GenerateBoundary();
-            var formDataBytes = UnityWebRequest.SerializeFormSections(formData, boundary);
+        private void SetStatus(string text)
+        {
+            if (useCanvas && transcriptionText) transcriptionText.text = text;
+        }
 
-            request.uploadHandler = new UploadHandlerRaw(formDataBytes);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type",
-                "multipart/form-data; boundary=" + System.Text.Encoding.UTF8.GetString(boundary));
+        private void OnDisable()
+        {
+            if (_isRecording) Microphone.End(_selectedMic);
+            _isRecording = false;
+            _request?.Abort();
+            if (_clip) Destroy(_clip);
+            _clip = null;
+        }
 
-            await request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.ConnectionError &&
-                request.result != UnityWebRequest.Result.ProtocolError)
-                return request.downloadHandler.text;
-
-            Debug.LogError("OpenAI API Error: " + request.error + "\nResponse: " + request.downloadHandler.text);
-            return "Error: " + request.downloadHandler.text;
+        private void OnDestroy()
+        {
+            if (recordButton) recordButton.onClick.RemoveListener(ToggleRecording);
+            if (microphoneDropdown) microphoneDropdown.onValueChanged.RemoveListener(ChangeMicrophone);
         }
 
         private void Update()
@@ -235,16 +189,9 @@ namespace QuestCameraKit.OpenAI
             if (_isRecording)
             {
                 _time += Time.deltaTime;
-                if (_time >= recordingMaximum)
-                {
-                    EndRecording();
-                }
+                if (_time >= Mathf.Max(1, recordingMaximum)) EndRecording();
             }
-
-            if (OVRInput.GetDown(OVRInput.Button.Start))
-            {
-                ToggleRecording();
-            }
+            if (OVRInput.GetDown(OVRInput.Button.Start)) ToggleRecording();
         }
     }
 }

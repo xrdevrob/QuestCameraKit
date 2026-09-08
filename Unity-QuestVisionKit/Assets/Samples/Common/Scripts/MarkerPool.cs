@@ -25,6 +25,14 @@ public class MarkerPool : MonoBehaviour
             return;
         }
 
+        if (!markerPrefab || !markerPrefab.GetComponent<MarkerController>())
+        {
+            Debug.LogError("MarkerPool: Assign a prefab with a MarkerController.");
+            enabled = false;
+            return;
+        }
+
+        poolSize = Mathf.Max(1, poolSize);
         _pool = new List<GameObject>(poolSize);
         for (var i = 0; i < poolSize; i++)
         {
@@ -34,11 +42,17 @@ public class MarkerPool : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     public GameObject GetMarker()
     {
+        if (_pool == null) return null;
         foreach (var marker in _pool)
         {
-            if (marker.activeSelf) continue;
+            if (!marker || marker.activeSelf) continue;
             marker.SetActive(true);
             return marker;
         }

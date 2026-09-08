@@ -2417,7 +2417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7588ce98b751e28419e83a73016454e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WebSocketServerAddress: wss://unity-webrtc-signaling.glitch.me
+  WebSocketServerAddress: wss://your-signaling-server.example
   StunServerAddress: stun:stun.l.google.com:19302
   LocalPeerId: Quest-PeerId
   UseHTTPHeader: 1
@@ -2435,7 +2435,7 @@ MonoBehaviour:
   RTDepth: 24
   OneFacePerFrame: 0
   receivingRenderTexture: {fileID: 0}
-  WebSocketConnectionActive: 1
+  WebSocketConnectionActive: 0
   SendWebSocketTestMessage: 0
   WebSocketConnectionChanged:
     m_PersistentCalls:

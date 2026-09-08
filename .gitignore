@@ -118,3 +118,8 @@ Assets/.avatar_sdk_sample_assets_importer.txt
 **/RuntimeActionBindings.json
 **/RuntimeActionBindings.json.meta
 .editorconfig
+
+# Local Unity build/validation evidence is delivered separately from source.
+/*.log
+/scene-audit.txt
+/evidence/

@@ -33,6 +33,8 @@ public class QrCodeDisplayManager : MonoBehaviour
         }
 
         var qrResults = await _scanner.ScanFrameAsync();
+        if (!this || !isActiveAndEnabled) return;
+        CleanupInactiveMarkers();
         if (qrResults == null || qrResults.Length == 0)
         {
             CleanupInactiveMarkers();
@@ -174,10 +176,11 @@ public class QrCodeDisplayManager : MonoBehaviour
         var up = (worldCorners[1] - worldCorners[0]).normalized;
         var right = (worldCorners[2] - worldCorners[1]).normalized;
         var normal = -Vector3.Cross(up, right).normalized;
+        if (normal.sqrMagnitude < 0.001f || up.sqrMagnitude < 0.001f) return false;
         var rotation = Quaternion.LookRotation(normal, up);
 
-        var width = Vector3.Distance(worldCorners[0], worldCorners[1]);
-        var height = Vector3.Distance(worldCorners[0], worldCorners[3]);
+        var width = Vector3.Distance(worldCorners[0], worldCorners[3]);
+        var height = Vector3.Distance(worldCorners[0], worldCorners[1]);
         var scaleFactor = 1.5f;
         scale = new Vector3(width * scaleFactor, height * scaleFactor, 1f);
         pose = new Pose(center, rotation);
