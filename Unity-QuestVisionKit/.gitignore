@@ -129,9 +129,6 @@ Assets/Nuget.config.meta
 **/RuntimeActionBindings.json.meta
 .editorconfig
 
-# Checked-in QR runtime dependency.
-!Assets/Plugins/ZXing/zxing.dll
-
 # Machine-local SDK configuration and test/build output.
 Assets/Resources/DevAgentSettings.asset
 Assets/Resources/DevAgentSettings.asset.meta

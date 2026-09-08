@@ -1,10 +1,8 @@
 # Third-party dependencies
 
-## ZXing.Net 0.16.11
+## Native QR tracking
 
-The QRCodeTracking sample includes the unmodified .NET Standard 2.0 assembly from [ZXing.Net 0.16.11 on NuGet](https://www.nuget.org/packages/ZXing.Net/0.16.11), maintained at [micjahn/ZXing.Net](https://github.com/micjahn/ZXing.Net). Licensed under Apache-2.0; see `Assets/Plugins/ZXing/LICENSE.txt`.
-
-Assembly SHA-256: `f3b823b6fd6492525a7547989056883def5d43be1e12c4f63fa54df73e3c5cfc`.
+QR tracking uses the existing Meta XR Core/MRUK packages and their bundled licenses. No additional QR decoder is shipped.
 
 ## WebRTC
 

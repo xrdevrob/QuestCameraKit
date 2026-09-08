@@ -16,7 +16,6 @@ namespace QuestCameraKit.Diagnostics
         private int[] _frames;
         private float[] _lastFrameTimes;
         private ObjectDetector _detector;
-        private QrCodeScanner _scanner;
         private int _errors;
         public string ProviderId => "quest-camera-kit";
 
@@ -37,7 +36,6 @@ namespace QuestCameraKit.Diagnostics
             _frames = new int[_cameras.Length];
             _lastFrameTimes = new float[_cameras.Length];
             _detector = FindAnyObjectByType<ObjectDetector>();
-            _scanner = FindAnyObjectByType<QrCodeScanner>();
         }
 
         private void OnEnable()
@@ -80,10 +78,6 @@ namespace QuestCameraKit.Diagnostics
                 nativeQrSupported = MRUK.Instance && MRUK.Instance.QRCodeTrackingSupported,
                 nativeQrTrackingEnabled = MRUK.Instance && MRUK.Instance.SceneSettings.TrackerConfiguration.QRCodeTrackingEnabled
             };
-#if ZXING_ENABLED
-            state.qrScanCount = _scanner ? _scanner.CompletedScanCount : 0;
-            state.qrDecodedCount = _scanner ? _scanner.DecodedCodeCount : 0;
-#endif
             for (var i = 0; i < _cameras.Length; i++)
             {
                 if (_cameras[i] && _cameras[i].IsPlaying) state.playingCameraCount++;
@@ -102,8 +96,6 @@ namespace QuestCameraKit.Diagnostics
             public int minFramesObserved;
             public float maxFrameAgeSeconds;
             public int inferenceCount;
-            public int qrScanCount;
-            public int qrDecodedCount;
             public int errorCount;
             public bool nativeQrSupported;
             public bool nativeQrTrackingEnabled;

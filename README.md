@@ -16,9 +16,9 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 
 # Running all samples
 
-Build and Run now includes all seven headset samples in one app. Press **Y** to open or close the menu, move the **left thumbstick** to choose, and press **X** to load a sample. In the Editor use **M**, **↑/↓**, and **Enter**. This menu currently uses Touch controllers; the samples retain their existing hand interactions. The desktop WebRTC receiver remains a separate scene.
+Build and Run now includes all six headset samples in one app. Press **Y** to open or close the menu, move the **left thumbstick** to choose, and press **X** to load a sample. In the Editor use **M**, **↑/↓**, and **Enter**. This menu currently uses Touch controllers; the samples retain their existing hand interactions. The desktop WebRTC receiver remains a separate scene.
 
-For QR tracking without an extra decoder, start with **QR tracking (Meta native)**, sample 7. It uses the MRUK package already required by this project. Sample 3 demonstrates raw camera decoding using the bundled ZXing library; no manual NuGet installation is needed. Native tracking still depends on headset runtime support and spatial-data permission.
+**QR tracking (Meta native)** uses the MRUK package already required by this project. No separate decoder, NuGet installation, or QR scripting define is needed. Native tracking still depends on headset runtime support and spatial-data permission.
 
 # PCA Samples
 
@@ -69,22 +69,23 @@ For QR tracking without an extra decoder, start with **QR tracking (Meta native)
 
 ![Object Detection](https://media.githubusercontent.com/media/xrdevrob/QuestCameraKit/befec3b/Media/ObjectDetection.gif)
 
-## 3. 📱 QR Code Tracking with ZXing
+## 3. 📱 Native QR Code Tracking
 
-- **Purpose:** Detect and track QR codes in real time. Open webviews or log-in to 3rd party services with ease.
-- **Description:** Similarly to the object detection sample, get QR code coordinated and projects them into 3D space. Detect QR codes and call their URLs. You can select between a multiple or single QR code mode. The sample is running at around `70 fps` for multiple QR codes and a stable `72 fps` for a single code. Users are able to choose between CenterOnly and PerCorner raycasting modes via an enum in the inspector. This enables more accurate rotation tracking for use cases that require it (PerCorner), while preserving a faster fallback (CenterOnly).
+- **Purpose:** Detect and track QRCodes without having to use a third-party library.
+- **Description:** As this feature is still in experimental state, make sure to use experimental mode on your Quest3 when testing. Unity usually asks for enabling that, before building. You can activate it via command line command using Meta Quest Hub too. More information can be found here - [MR Utility Kit QRCode Detection](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection) and here - [Mobile Experimental Features](https://developers.meta.com/horizon/documentation/native/android/mobile-experimental-features/)
 
 <details>
 <summary>How to run this sample</summary>
 
-- Open the `QRCodeTracking` scene.
-- ZXing.Net 0.16.11 is included; the editor script maintains the `ZXING_ENABLED` define.
-- Choose Single or Multiple detection mode and the raycast mode (CenterOnly vs PerCorner).
-- Build to Quest, point the headset toward QR codes, and interact with the spawned markers.
+- Install **TextMeshPro Essentials** if prompted.
+- Enable Experimental Mode on your Quest 3/3S (headset UI or Quest Hub CLI).
+- Open the **QRCodeDetection** scene.
+- Build and deploy to your device, then use the controllers to interact with the UI (hand tracking is not yet supported).
 
 </details>
 
-![QR Code Tracking](https://media.githubusercontent.com/media/xrdevrob/QuestCameraKit/befec3b/Media/QRCodeTracking.gif)
+![Native QR tracking](https://media.githubusercontent.com/media/xrdevrob/QuestCameraKit/befec3b/Media/QrCodeDetection.png)
+
 
 ## 4. 🪟 Shader Samples
 
@@ -239,29 +240,12 @@ https://github.com/user-attachments/assets/a4cfbfc2-0306-40dc-a9a3-cdccffa7afea
 
 ![PCA WebRTC](https://media.githubusercontent.com/media/xrdevrob/QuestCameraKit/befec3b/Media/PCA_WebRTC.gif)
 
-## 7. 📅 Experimental QR Code detection
-
-- **Purpose:** Detect and track QRCodes without having to use a third-party library.
-- **Description:** As this feature is still in experimental state, make sure to use experimental mode on your Quest3 when testing. Unity usually asks for enabling that, before building. You can activate it via command line command using Meta Quest Hub too. More information can be found here - [MR Utility Kit QRCode Detection](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection) and here - [Mobile Experimental Features](https://developers.meta.com/horizon/documentation/native/android/mobile-experimental-features/)
-
-<details>
-<summary>How to run this sample</summary>
-
-- Install **TextMeshPro Essentials** if prompted.
-- Enable Experimental Mode on your Quest 3/3S (headset UI or Quest Hub CLI).
-- Open the **QRCodeDetection** scene.
-- Build and deploy to your device, then use the controllers to interact with the UI (hand tracking is not yet supported).
-
-</details>
-
-![Shader Samples](https://media.githubusercontent.com/media/xrdevrob/QuestCameraKit/befec3b/Media/QrCodeDetection.png)
-
 # Update Notes
 
 ## Maintenance update
 
 - Unity **6000.3.12f1**, Meta XR Core/MRUK **205.0.0**, Inference Engine **2.6.1**, OpenXR **1.18.0**, Meta OpenXR **2.6.1**, and URP **17.3.0**. Other direct dependencies are pinned in the manifest.
-- QR and WebRTC dependencies install with the project. All eight sample scenes are checked for missing scripts.
+- QR tracking uses Meta MRUK; WebRTC dependencies install with the project. All seven sample scenes are checked for missing scripts.
 - Camera/inference lifecycle fixes, capture-pose detection placement, reusable detection markers, safer voice requests, and corrected stereo WAV encoding.
 - API credentials must be supplied privately for ImageLLM; never commit a real key to a prefab or scene.
 - **Build and Run** defaults to ColorPicker. Use the per-sample build command and Quak device tests in [Testing](docs/testing.md) for the other scenes.
@@ -311,7 +295,7 @@ Allow Package Manager to resolve the pinned dependencies, then follow the select
 
 # Troubleshooting & Known Issues
 
-- For sample 7 QR Code Detection, make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
+- For sample 3 QR Code Detection, make sure experimental mode is active. You can find more information about the necessary steps [here](https://developers.meta.com/horizon/documentation/unity/unity-mr-utility-kit-qrcode-detection).
 - Object Detection uses `Unity.InferenceEngine` with `com.unity.ai.inference@2.6.1`.
 - If switching between Unity 6 and other versions such as 2023 or 2022 it can happen that your Android Manifest is getting modified and the app won't run anymore. Should this happen to you make sure to go to `Meta > Tools > Update AndroidManifest.xml` or `Meta > Tools > Create store-compatible AndroidManifest.xml`. After that make sure you add back the `horizonos.permission.HEADSET_CAMERA` manually into your manifest file.
 
@@ -401,7 +385,6 @@ large files are removed from the current checkout. See
 
 - Thanks to **Meta** for the Passthrough Camera API and [**Passthrough Camera API Samples**](https://github.com/oculus-samples/Unity-PassthroughCameraApiSamples/).
 - Thanks to shader wizard [Daniel Ilett](https://www.youtube.com/@danielilett) for helping me in the shader samples.
-- Thanks to **[Michael Jahn](https://github.com/micjahn/ZXing.Net/)** for the ZXing.Net library used for the QR code tracking samples.
 - Special thanks to [Markus Altenhofer](https://www.linkedin.com/in/markus-altenhofer-176453155/) from [FireDragonGameStudio](https://www.youtube.com/@firedragongamestudio) for contributing the WebRTC sample scene.
 - Special thanks to [Thomas Ratliff](https://x.com/devtom7) for contributing his [shader samples](https://x.com/devtom7/status/1902033672041091453) to the repo.
  

@@ -39,9 +39,9 @@ namespace QuestCameraKit.Editor
         {
             Require(typeof(QuestCameraKit.WebRTC.WebRTCController).GetField("_webRTCConnection",
                 BindingFlags.NonPublic | BindingFlags.Instance) != null, "WEBRTC_ENABLED must compile the streaming controller.");
-            Require(SampleMenu.Label("Assets/Samples/7 QRCodeDetection/QRCodeDetection.unity") == "QR tracking (Meta native)",
+            Require(SampleMenu.Label("Assets/Samples/3 QRCodeDetection/QRCodeDetection.unity") == "QR tracking (Meta native)",
                 "Native QR must be clearly distinguished from the raw-camera sample.");
-            Require(SampleMenu.AvailableScenes().Length == 7 && !SampleMenu.AvailableScenes().Any(path => path.Contains("WebRTC-SingleClient")), "The combined build must contain all seven headset samples.");
+            Require(SampleMenu.AvailableScenes().Length == 6 && !SampleMenu.AvailableScenes().Any(path => path.Contains("WebRTC-SingleClient")), "The combined build must contain all six headset samples.");
             CheckWavStereo();
             CheckModelContract();
             var escape = typeof(ImageOpenAIConnector).GetMethod("EscapeJson", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -57,43 +57,8 @@ namespace QuestCameraKit.Editor
                 Require((string)escape.Invoke(connector, new object[] { null }) == "", "Null command must serialize safely.");
             }
             finally { Object.DestroyImmediate(owner); }
-#if ZXING_ENABLED
-            CheckQr();
-#else
-            throw new InvalidOperationException("ZXing must be present and ZXING_ENABLED set; QR sample would otherwise do nothing.");
-#endif
             Debug.Log("PASS: QuestCameraKit maintenance regression checks.");
         }
-
-#if ZXING_ENABLED
-        private static void CheckQr()
-        {
-            var method = typeof(QrCodeScanner).GetMethod("GetFinderCorners", BindingFlags.NonPublic | BindingFlags.Static);
-            Require(method != null, "QR finder points need a consistent four-corner conversion.");
-            var points = new[] { new ZXing.ResultPoint(10, 90), new ZXing.ResultPoint(10, 10), new ZXing.ResultPoint(90, 10) };
-            var corners = (Vector3[])method.Invoke(null, new object[] { points, 100, 100 });
-            Require(corners.Length == 4 && Vector3.Distance(corners[3], new Vector3(0.9f, 0.9f, 0f)) < 0.0001f,
-                "Version-one QR finder points must produce a fourth corner.");
-            var invalid = (Vector3[])method.Invoke(null, new object[] { new ZXing.ResultPoint[0], 100, 100 });
-            Require(invalid.Length == 0, "Incomplete finder points must be rejected.");
-            var matrix = new ZXing.QrCode.QRCodeWriter().encode("QuestCameraKit regression", ZXing.BarcodeFormat.QR_CODE, 128, 128);
-            var pixels = new byte[128 * 128];
-            for (var y = 0; y < 128; y++)
-                for (var x = 0; x < 128; x++) pixels[y * 128 + x] = matrix[x, y] ? (byte)0 : (byte)255;
-            var bitmap = new ZXing.BinaryBitmap(new ZXing.Common.HybridBinarizer(
-                new ZXing.RGBLuminanceSource(pixels, 128, 128, ZXing.RGBLuminanceSource.BitmapFormat.Gray8)));
-            var result = new ZXing.QrCode.QRCodeReader().decode(bitmap);
-            Require(result != null && result.Text == "QuestCameraKit regression", "Bundled ZXing must decode a generated QR.");
-            var go = new GameObject("qr-no-camera-check");
-            try
-            {
-                var scanner = go.AddComponent<QrCodeScanner>();
-                var task = scanner.ScanFrameAsync();
-                Require(task.IsCompleted && task.Result.Length == 0, "Absent camera must return immediately, not leave a pending scan.");
-            }
-            finally { Object.DestroyImmediate(go); }
-        }
-#endif
 
         private static void CheckModelContract()
         {

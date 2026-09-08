@@ -78,7 +78,6 @@ namespace QuestCameraKit
             {
                 "ColorPicker" => "Color picker",
                 "ObjectDetection" => "Object detection",
-                "QRCodeTracking" => "QR from camera (ZXing)",
                 "CameraMappingForShaders" => "Camera shaders",
                 "ImageLLM" => "Image + voice AI",
                 "WebRTC-Quest" => "WebRTC streaming",
