@@ -18,6 +18,8 @@ def check() -> None:
         path = ROOT / name
         if not path.is_file():
             continue
+        if name.lower().endswith("/zxing.dll"):
+            failures.append(f"{name}: native QR tracking must not ship a separate decoder")
         if name.startswith('Unity-QuestVisionKit/Assets/'):
             with path.open('rb') as stream:
                 prefix = stream.read(128)

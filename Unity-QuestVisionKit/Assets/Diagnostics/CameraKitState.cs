@@ -2,6 +2,7 @@
 using System;
 using Meta.XR;
 using Meta.XR.MRUtilityKit;
+using Meta.XR.MRUtilityKitSamples.QRCodeDetection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using XRDevRob.QUAK;
@@ -16,6 +17,7 @@ namespace QuestCameraKit.Diagnostics
         private int[] _frames;
         private float[] _lastFrameTimes;
         private ObjectDetector _detector;
+        private SampleMenu _menu;
         private int _errors;
         public string ProviderId => "quest-camera-kit";
 
@@ -36,6 +38,7 @@ namespace QuestCameraKit.Diagnostics
             _frames = new int[_cameras.Length];
             _lastFrameTimes = new float[_cameras.Length];
             _detector = FindAnyObjectByType<ObjectDetector>();
+            _menu = FindAnyObjectByType<SampleMenu>();
         }
 
         private void OnEnable()
@@ -75,6 +78,10 @@ namespace QuestCameraKit.Diagnostics
                 minFramesObserved = _cameras.Length == 0 ? 0 : int.MaxValue,
                 inferenceCount = _detector ? _detector.CompletedInferenceCount : 0,
                 errorCount = _errors,
+                menuVisible = _menu && _menu.IsVisible,
+                menuSampleCount = _menu ? _menu.SampleCount : 0,
+                nativeQrHasPermissions = QRCodeManager.HasPermissions,
+                nativeQrTrackedCount = QRCodeManager.ActiveTrackedCount,
                 nativeQrSupported = MRUK.Instance && MRUK.Instance.QRCodeTrackingSupported,
                 nativeQrTrackingEnabled = MRUK.Instance && MRUK.Instance.SceneSettings.TrackerConfiguration.QRCodeTrackingEnabled
             };
@@ -97,6 +104,10 @@ namespace QuestCameraKit.Diagnostics
             public float maxFrameAgeSeconds;
             public int inferenceCount;
             public int errorCount;
+            public bool menuVisible;
+            public int menuSampleCount;
+            public bool nativeQrHasPermissions;
+            public int nativeQrTrackedCount;
             public bool nativeQrSupported;
             public bool nativeQrTrackingEnabled;
         }

@@ -21,7 +21,7 @@ Unity -batchmode -nographics -quit \
   -logFile /absolute/path/checks.log
 ```
 
-These cover stereo PCM/WAV headers and samples, the bundled model's CPU output contract on a synthetic black input, command JSON escaping (including null and control characters). `MaintenanceChecks.CheckWavStereo` is the focused regression that failed before the stereo fix.
+These cover stereo PCM/WAV headers and samples, the bundled model's CPU output contract on a synthetic black input, command JSON escaping (including null and control characters), and native QR overlay transitions through absent/present/lost bounds. `MaintenanceChecks.CheckWavStereo` is the focused regression that failed before the stereo fix.
 
 Run `QuestCameraKit.Editor.MaintenanceChecks.AuditScenes` the same way to inspect all seven sample scenes for missing MonoBehaviours. Its `scene-audit.txt` is written at the repository root. It opens scenes without saving them.
 
@@ -44,6 +44,9 @@ Use `AllSamples` for the combined menu app, or `ObjectDetection`, `CameraMapping
 For a **non-development release build**, disable `XR_APILAYER_XRDEVROB_quak_injection` in Android's OpenXR API Layers settings first. Quak deliberately rejects release builds with its injection layer enabled. The command above is explicitly a device-test build, not a store-release pipeline.
 
 ## Quak device checks
+
+Use `quak-tests/AllSamples.json` for the combined app's startup/menu/camera check. The native QR plan requires an actual QR trackable from MRUK; a merely supported API cannot pass it. Present a known QR code and visually compare its decoded payload and spatial alignment. Neither startup plan proves controller-driven navigation: open the menu, visit every sample, return to the first, and repeat on the headset to check camera/scene cleanup.
+
 
 XRQA is now named **Quak**. Use the matching [v0.4.0-alpha.1 release](https://github.com/xrdevrob/quak/releases/tag/v0.4.0-alpha.1), verify its `SHA256SUMS`, and install the Python wheel in an isolated environment. The Unity package in this repository is that same release. Run `quak setup --project /absolute/path/Unity-QuestVisionKit` to create local CLI configuration when needed.
 

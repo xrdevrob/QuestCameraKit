@@ -16,6 +16,8 @@ namespace QuestCameraKit
         private int _selected;
         private bool _stickHeld;
         private bool _loading;
+        public bool IsVisible => _canvas && _canvas.enabled;
+        public int SampleCount => _paths?.Length ?? 0;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Install()

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "name": "QRCodeDetection device camera and runtime check",
-  "description": "Observes the real sample camera and processing pipeline. This does not assert semantic detection accuracy or a user interaction.",
+  "name": "Native QR tracking with a visible real QR code",
+  "description": "Requires spatial-data permission, native tracking support, enabled tracking, and at least one QR trackable emitted by MRUK. Hold a known QR code in view and review its payload and alignment visually.",
   "target": "quest",
   "expected_application_id": "com.xrdevrob.questcamerakit.qrcodedetection",
   "expected_scene": "QRCodeDetection",
@@ -36,9 +36,24 @@
           "path": "$.data.data.result.state.quest-camera-kit.nativeQrSupported",
           "op": "equals",
           "expected": true
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.nativeQrHasPermissions",
+          "op": "equals",
+          "expected": true
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.nativeQrTrackingEnabled",
+          "op": "equals",
+          "expected": true
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.nativeQrTrackedCount",
+          "op": "gte",
+          "expected": 1
         }
       ],
-      "failure_guidance": "Check camera permissions, headset focus, scene references, and device logs; a running app without fresh camera frames is not a pass."
+      "failure_guidance": "Check native QR runtime support, spatial-data permission, and the tracking toggle. Hold a real QR code in view. A supported API without a tracked QR code is not a pass."
     }
   ]
 }
