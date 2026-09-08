@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "name": "Combined samples startup and menu check",
+  "description": "Checks the real ColorPicker camera and initial six-sample menu. Does not establish controller-driven scene switching.",
+  "target": "quest",
+  "expected_application_id": "com.xrdevrob.questcamerakit.allsamples",
+  "expected_scene": "ColorPicker",
+  "visual_evidence": {
+    "required": true,
+    "capture_policy": "unattended",
+    "fps": 2,
+    "max_duration_seconds": 20,
+    "focus_clips": "marked-and-failures",
+    "target_highlight": "focused-clips"
+  },
+  "steps": [
+    {
+      "id": "observe-sample",
+      "provider": "unity",
+      "tool": "quak_get_state",
+      "arguments": {},
+      "wait_timeout_seconds": 15,
+      "poll_interval_seconds": 0.5,
+      "assertions": [
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.scene",
+          "op": "equals",
+          "expected": "ColorPicker"
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.errorCount",
+          "op": "equals",
+          "expected": 0
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.cameraCount",
+          "op": "equals",
+          "expected": 1
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.playingCameraCount",
+          "op": "equals",
+          "expected": 1
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.minFramesObserved",
+          "op": "gte",
+          "expected": 10
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.maxFrameAgeSeconds",
+          "op": "lte",
+          "expected": 2
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.menuVisible",
+          "op": "equals",
+          "expected": true
+        },
+        {
+          "path": "$.data.data.result.state.quest-camera-kit.menuSampleCount",
+          "op": "equals",
+          "expected": 6
+        }
+      ],
+      "failure_guidance": "Check camera permissions, headset focus, scene references, and device logs; a running app without fresh camera frames is not a pass."
+    }
+  ]
+}

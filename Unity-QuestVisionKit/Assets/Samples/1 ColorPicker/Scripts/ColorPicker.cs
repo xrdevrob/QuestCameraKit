@@ -1,7 +1,6 @@
 using Meta.XR;
 using Unity.Collections;
 using UnityEngine;
-using System.Collections;
 
 public enum SamplingMode
 {
@@ -29,7 +28,7 @@ public class ColorPicker : MonoBehaviour
 
     private float _prevCorrectionFactor = 1f;
     private Vector3? _lastHitPoint;
-    private Camera _mainCamera;
+    private MaterialPropertyBlock _sampleProperties;
     private Renderer _manualRenderer;
     [SerializeField] private PassthroughCameraAccess cameraAccess;
     private EnvironmentRaycastManager _raycastManager;
@@ -37,25 +36,25 @@ public class ColorPicker : MonoBehaviour
 
     private void Start()
     {
-        _mainCamera = Camera.main;
         cameraAccess = ResolveCameraAccess(cameraAccess);
         _raycastManager = GetComponent<EnvironmentRaycastManager>();
 
-        if (!_mainCamera || !cameraAccess || !_raycastManager ||
-            (samplingMode == SamplingMode.Environment && !raySampleOrigin) ||
+        if (!cameraAccess ||
+            (samplingMode == SamplingMode.Environment && (!raySampleOrigin || !_raycastManager)) ||
             (samplingMode == SamplingMode.Manual && !manualSamplingOrigin))
         {
             Debug.LogError("ColorPicker: Missing required references.");
+            enabled = false;
             return;
         }
 
         if (manualSamplingOrigin)
         {
             _manualRenderer = manualSamplingOrigin.GetComponent<Renderer>();
+            _sampleProperties = new MaterialPropertyBlock();
         }
 
         SetupLineRenderer();
-        StartCoroutine(WaitForCameraFeed());
     }
 
     private static PassthroughCameraAccess ResolveCameraAccess(PassthroughCameraAccess configuredAccess)
@@ -65,15 +64,6 @@ public class ColorPicker : MonoBehaviour
             return configuredAccess;
         }
         return FindAnyObjectByType<PassthroughCameraAccess>(FindObjectsInactive.Include);
-    }
-
-    private IEnumerator WaitForCameraFeed()
-    {
-        while (cameraAccess && !cameraAccess.IsPlaying)
-        {
-            yield return null;
-        }
-        _cameraResolution = cameraAccess ? cameraAccess.CurrentResolution : Vector2Int.zero;
     }
 
     private void Update()
@@ -93,15 +83,18 @@ public class ColorPicker : MonoBehaviour
             Ray ray = new(raySampleOrigin.position, raySampleOrigin.forward);
             var hitSuccess = _raycastManager.Raycast(ray, out var hit);
 
-            lineRenderer.enabled = true;
-            lineRenderer.SetPosition(0, ray.origin);
-            lineRenderer.SetPosition(1, hitSuccess ? hit.point : ray.origin + ray.direction * 5f);
+            if (lineRenderer)
+            {
+                lineRenderer.enabled = true;
+                lineRenderer.SetPosition(0, ray.origin);
+                lineRenderer.SetPosition(1, hitSuccess ? hit.point : ray.origin + ray.direction * 5f);
+            }
 
             _lastHitPoint = hitSuccess ? hit.point : null;
         }
         else
         {
-            lineRenderer.enabled = false;
+            if (lineRenderer) lineRenderer.enabled = false;
             _lastHitPoint = manualSamplingOrigin.position;
         }
     }
@@ -122,7 +115,7 @@ public class ColorPicker : MonoBehaviour
         }
 
         var colors = cameraAccess.GetColors();
-        if (!colors.IsCreated)
+        if (!colors.IsCreated || colors.Length != _cameraResolution.x * _cameraResolution.y)
         {
             Debug.LogWarning("ColorPicker: Camera colors not ready.");
             return;
@@ -132,7 +125,10 @@ public class ColorPicker : MonoBehaviour
 
         if (_manualRenderer)
         {
-            _manualRenderer.material.color = color;
+            _manualRenderer.GetPropertyBlock(_sampleProperties);
+            _sampleProperties.SetColor("_BaseColor", color);
+            _sampleProperties.SetColor("_Color", color);
+            _manualRenderer.SetPropertyBlock(_sampleProperties);
         }
     }
 
@@ -144,8 +140,10 @@ public class ColorPicker : MonoBehaviour
             return false;
         }
 
-        var viewport = cameraAccess.WorldToViewportPoint(worldPoint);
-        if (viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f)
+        var pose = cameraAccess.GetCameraPose();
+        if (Vector3.Dot(worldPoint - pose.position, pose.rotation * Vector3.forward) <= 0f) return false;
+        var viewport = cameraAccess.WorldToViewportPoint(worldPoint, pose);
+        if (!float.IsFinite(viewport.x) || !float.IsFinite(viewport.y) || viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f)
         {
             return false;
         }
@@ -165,14 +163,14 @@ public class ColorPicker : MonoBehaviour
         _prevCorrectionFactor = Mathf.Lerp(_prevCorrectionFactor, factor, correctionSmoothing);
 
         var corrected = (sampledColor.linear * _prevCorrectionFactor).gamma;
-        return new Color(Mathf.Clamp01(corrected.r), Mathf.Clamp01(corrected.g), Mathf.Clamp01(corrected.b), corrected.a);
+        return new Color(Mathf.Clamp01(corrected.r), Mathf.Clamp01(corrected.g), Mathf.Clamp01(corrected.b), sampledColor.a);
     }
 
     private float CalculateRoiBrightness(Vector2Int centerPixel, NativeArray<Color32> colors, Vector2Int resolution)
     {
         var sum = 0f;
         var count = 0;
-        var half = roiSize / 2;
+        var half = Mathf.Max(1, roiSize) / 2;
 
         for (var i = -half; i <= half; i++)
         {

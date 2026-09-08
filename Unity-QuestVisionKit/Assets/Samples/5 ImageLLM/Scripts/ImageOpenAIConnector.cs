@@ -94,6 +94,8 @@ namespace QuestCameraKit.OpenAI
         private AudioSource processingAudioSource;
 
         private const string OutputFormat = "mp3";
+        public bool HasApiKey => !string.IsNullOrWhiteSpace(apiKey) &&
+                                 apiKey != "YOUR_API_KEY" && apiKey != "YOUR_OPENAI_API_KEY";
 
         [Serializable]
         private class TtsPayload
@@ -101,7 +103,7 @@ namespace QuestCameraKit.OpenAI
             public string model;
             public string input;
             public string voice;
-            public string responseFormat;
+            public string response_format;
             public float speed;
         }
 
@@ -109,13 +111,13 @@ namespace QuestCameraKit.OpenAI
 
         private void Awake()
         {
-            sttManager.onRequestSent.AddListener(StartProcessingSound);
+            if (sttManager) sttManager.onRequestSent.AddListener(StartProcessingSound);
             onResponseReceived.AddListener(StopProcessingSound);
         }
 
         private void OnDestroy()
         {
-            sttManager.onRequestSent.RemoveListener(StartProcessingSound);
+            if (sttManager) sttManager.onRequestSent.RemoveListener(StartProcessingSound);
             onResponseReceived.RemoveListener(StopProcessingSound);
         }
 
@@ -130,7 +132,7 @@ namespace QuestCameraKit.OpenAI
             processingAudioSource.Play();
         }
 
-        private void StopProcessingSound(string response)
+        public void StopProcessingSound(string response)
         {
             if (processingAudioSource)
             {
@@ -154,14 +156,18 @@ namespace QuestCameraKit.OpenAI
         public IEnumerator RequestTextToSpeech(string text, Action<byte[]> onSuccess, Action<string> onError,
             TtsModel model = TtsModel.Tts1, TtsVoice voice = TtsVoice.Alloy, float speed = 1f)
         {
-            Debug.Log("Sending new request to OpenAI TTS.");
+            if (!HasApiKey)
+            {
+                onError?.Invoke("Configure an API key before requesting speech.");
+                yield break;
+            }
 
             var payload = new TtsPayload
             {
                 model = model.EnumToString(),
                 input = text,
-                voice = voice.ToString().ToLower(),
-                responseFormat = OutputFormat,
+                voice = voice.ToString().ToLowerInvariant(),
+                response_format = OutputFormat,
                 speed = speed
             };
 
@@ -170,15 +176,16 @@ namespace QuestCameraKit.OpenAI
             using var request = new UnityWebRequest("https://api.openai.com/v1/audio/speech", "POST");
             var bodyRaw = Encoding.UTF8.GetBytes(jsonPayload);
 
+            request.timeout = 60;
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("Authorization", "Bearer " + apiKey);
 
             yield return request.SendWebRequest();
+            StopProcessingSound("");
 
-            if (request.result == UnityWebRequest.Result.ConnectionError ||
-                request.result == UnityWebRequest.Result.ProtocolError)
+            if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError("TTS Request Error: " + request.error);
                 onError?.Invoke(request.error);
@@ -201,6 +208,12 @@ namespace QuestCameraKit.OpenAI
         /// <param name="command">The command text.</param>
         public void SendImage(Texture2D image, string command)
         {
+            if (!HasApiKey)
+            {
+                StopProcessingSound("");
+                Debug.LogWarning("Configure an API key before sending an image or command.");
+                return;
+            }
             StartCoroutine(SendImageRequest(image, command));
         }
 
@@ -209,10 +222,17 @@ namespace QuestCameraKit.OpenAI
             var base64Image = "";
             if (commandMode == OpenAICommandMode.ImageAndText || commandMode == OpenAICommandMode.ImageOnly)
             {
+                if (!image)
+                {
+                    StopProcessingSound("");
+                    Debug.LogError("An image is required for the selected command mode.");
+                    yield break;
+                }
                 var processedImage = (image.width == 512 && image.height == 512 && image.format == TextureFormat.RGBA32)
                     ? image
                     : ResizeTexture(image, 512, 512);
                 var imageBytes = processedImage.EncodeToJPG();
+                if (processedImage != image) Destroy(processedImage);
                 if (imageBytes == null || imageBytes.Length == 0)
                 {
                     Debug.LogError(
@@ -254,12 +274,13 @@ namespace QuestCameraKit.OpenAI
                               "\"messages\":[{" +
                               $"\"role\":\"user\",\"content\":[{contentJson}]" +
                               "}]," +
-                              "\"max_tokens\":300" +
+                              "\"max_completion_tokens\":300" +
                               "}";
 
             using var request = new UnityWebRequest("https://api.openai.com/v1/chat/completions", "POST");
             var bodyRaw = Encoding.UTF8.GetBytes(payloadJson);
 
+            request.timeout = 60;
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
@@ -267,9 +288,9 @@ namespace QuestCameraKit.OpenAI
 
             StartProcessingSound();
             yield return request.SendWebRequest();
+            StopProcessingSound("");
 
-            if (request.result == UnityWebRequest.Result.ConnectionError ||
-                request.result == UnityWebRequest.Result.ProtocolError)
+            if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Error sending request: {request.error} (Response code: {request.responseCode})");
             }
@@ -314,11 +335,12 @@ namespace QuestCameraKit.OpenAI
         }
 
         /// <summary>
-        /// Escapes double quotes in strings so that they can be safely embedded in JSON.
+        /// Escapes quotes, backslashes and control characters using the SDK JSON serializer.
         /// </summary>
         private string EscapeJson(string input)
         {
-            return input.Replace("\"", "\\\"");
+            var json = new JSONString(input ?? string.Empty).ToString();
+            return json.Substring(1, json.Length - 2);
         }
 
         #endregion

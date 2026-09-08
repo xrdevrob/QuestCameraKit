@@ -168,6 +168,8 @@ namespace Meta.XR.MRUtilityKitSamples.QRCodeDetection
             _txtLogs.pageToDisplay = _txtLogs.textInfo?.pageCount ?? 1;
         }
 
+        void OnDisable() => StopAllCoroutines();
+
         void OnEnable()
         {
             UpdateUI();

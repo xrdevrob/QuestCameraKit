@@ -4,7 +4,28 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Samples/1 ColorPicker/ColorPicker.unity
+    guid: 4297271dc2b40744bb71161efead075b
+  - enabled: 1
+    path: Assets/Samples/2 ObjectDetection/ObjectDetection.unity
+    guid: 59f22156e8aa44aeead8e1331b47c7aa
+  - enabled: 1
+    path: Assets/Samples/3 QRCodeDetection/QRCodeDetection.unity
+    guid: 8b94352aa29d6894d8e73966f3ee47d0
+  - enabled: 1
+    path: Assets/Samples/4 Shaders/CameraMappingForShaders.unity
+    guid: fc38ce993dd1495bb87751c2ec56a145
+  - enabled: 1
+    path: Assets/Samples/5 ImageLLM/ImageLLM.unity
+    guid: e315df11792f04348a6913e0c2feac5f
+  - enabled: 1
+    path: Assets/Samples/6 WebRTC/WebRTC-Quest.unity
+    guid: 4dc6138ac6e3c6348bba19965ecddf4d
+  - enabled: 0
+    path: Assets/Samples/6 WebRTC/WebRTC-SingleClient.unity
+    guid: 391160c7b8e603c4e82dd04b0c807c3e
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 1f6e424bb69784f8e8b5df6563fe45de, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

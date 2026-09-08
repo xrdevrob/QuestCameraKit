@@ -20,6 +20,7 @@ public class ObjectRenderer : MonoBehaviour
     private PassthroughCameraAccess _cameraAccess;
     private EnvironmentRaycastManager _envRaycastManager;
     private readonly Dictionary<string, MarkerController> _activeMarkers = new();
+    private readonly List<MarkerController> _markerPool = new();
 
     private void Awake()
     {
@@ -33,26 +34,24 @@ public class ObjectRenderer : MonoBehaviour
         _mainCamera = Camera.main;
     }
     
-    public void RenderDetections(Unity.InferenceEngine.Tensor<float> coords, Unity.InferenceEngine.Tensor<int> labelIDs, Unity.InferenceEngine.Tensor<float> confidences = null)
+    public void RenderDetections(Unity.InferenceEngine.Tensor<float> coords, Unity.InferenceEngine.Tensor<int> labelIDs, Unity.InferenceEngine.Tensor<float> confidences = null, Pose? capturePose = null)
     {
-        if (coords == null || labelIDs == null)
+        if (coords == null || labelIDs == null || coords.shape.rank != 2 || coords.shape[1] < 4)
         {
             return;
         }
 
-        if (!_cameraAccess || !_envRaycastManager)
+        if (!_cameraAccess || !_envRaycastManager || !markerPrefab || !_mainCamera)
         {
             Debug.LogWarning("[Detection3DRenderer] Missing dependencies.");
             return;
         }
 
-        var numDetections = coords.shape[0];
+        var numDetections = Mathf.Min(coords.shape[0], labelIDs.shape.length);
         ClearPreviousMarkers();
 
         var imageWidth = ModelInputSize;
         var imageHeight = ModelInputSize;
-        var halfWidth = imageWidth * 0.5f;
-        var halfHeight = imageHeight * 0.5f;
 
         for (var i = 0; i < numDetections; i++)
         {
@@ -61,16 +60,20 @@ public class ObjectRenderer : MonoBehaviour
             var detectedWidth = coords[i, 2];
             var detectedHeight = coords[i, 3];
 
-            var adjustedCenterX = detectedCenterX - halfWidth;
-            var adjustedCenterY = detectedCenterY - halfHeight;
+            var detectedLabel = (YOLOv9Labels)labelIDs[i];
+            if (labelFilters is { Length: > 0 } && !Array.Exists(labelFilters, label => label == detectedLabel)) continue;
+            var confidence = GetConfidence(coords, confidences, i);
+            if (confidence >= 0f && confidence < minConfidence) continue;
+            if (!float.IsFinite(detectedCenterX) || !float.IsFinite(detectedCenterY) ||
+                !float.IsFinite(detectedWidth) || !float.IsFinite(detectedHeight) ||
+                detectedWidth <= 0f || detectedHeight <= 0f) continue;
 
-            var perX = (adjustedCenterX + halfWidth) / imageWidth;
-            var perY = (adjustedCenterY + halfHeight) / imageHeight;
-            var centerRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(perX, perY));
+            var perX = detectedCenterX / imageWidth;
+            var perY = detectedCenterY / imageHeight;
+            var centerRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(perX, perY), capturePose);
 
             if (!_envRaycastManager.Raycast(centerRay, out var centerHit))
             {
-                Debug.LogWarning($"[Detection3DRenderer] Detection {i}: Environment raycast failed.");
                 continue;
             }
 
@@ -81,35 +84,24 @@ public class ObjectRenderer : MonoBehaviour
             var u2 = (detectedCenterX + detectedWidth * 0.5f) / imageWidth;
             var v2 = (detectedCenterY + detectedHeight * 0.5f) / imageHeight;
 
-            var tlRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(u1, v1));
-            var trRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(u2, v1));
-            var blRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(u1, v2));
-            var brRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(u2, v2));
+            var tlRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(u1, v1), capturePose);
+            var trRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(u2, v1), capturePose);
+            var blRay = _cameraAccess.ViewportPointToRay(DetectionToViewport(u1, v2), capturePose);
 
-            var depth = Vector3.Distance(_mainCamera.transform.position, markerWorldPos);
-            var worldTL = tlRay.GetPoint(depth);
-            var worldTR = trRay.GetPoint(depth);
-            var worldBL = blRay.GetPoint(depth);
+            var depth = Vector3.Distance(centerRay.origin, markerWorldPos);
+            var plane = new Plane(centerHit.normal, markerWorldPos);
+            var worldTL = tlRay.GetPoint(plane.Raycast(tlRay, out var tlDistance) ? tlDistance : depth);
+            var worldTR = trRay.GetPoint(plane.Raycast(trRay, out var trDistance) ? trDistance : depth);
+            var worldBL = blRay.GetPoint(plane.Raycast(blRay, out var blDistance) ? blDistance : depth);
 
             var markerWidth = Vector3.Distance(worldTR, worldTL);
             var markerHeight = Vector3.Distance(worldBL, worldTL);
             var markerScale = new Vector3(markerWidth, markerHeight, 1f);
 
-            var detectedLabel = (YOLOv9Labels)labelIDs[i];
-            if (labelFilters is { Length: > 0 } && !Array.Exists(labelFilters, label => label == detectedLabel))
-            {
-                continue;
-            }
-
             var surfaceNormal = SampleSurfaceNormal(markerWorldPos, centerHit.normal);
             var markerRotation = Quaternion.LookRotation(-surfaceNormal, Vector3.up);
 
             var dictionaryKey = detectedLabel.ToString();
-            var confidence = GetConfidence(coords, confidences, i);
-            if (confidence >= 0f && confidence < minConfidence)
-            {
-                continue;
-            }
             var labelWithConfidence = confidence >= 0f
                 ? $"{dictionaryKey} ({confidence * 100f:F0}%)"
                 : dictionaryKey;
@@ -125,12 +117,18 @@ public class ObjectRenderer : MonoBehaviour
                 lookupKey = $"{dictionaryKey}_{i}";
             }
 
-            var markerGo = Instantiate(markerPrefab);
-            var marker = markerGo.GetComponent<MarkerController>();
+            var marker = _markerPool.Find(item => item && !item.gameObject.activeSelf);
             if (!marker)
             {
-                Debug.LogWarning($"[Detection3DRenderer] Detection {i}: Marker prefab is missing a MarkerController component.");
-                continue;
+                var markerGo = Instantiate(markerPrefab);
+                marker = markerGo.GetComponent<MarkerController>();
+                if (!marker)
+                {
+                    Destroy(markerGo);
+                    Debug.LogError("[Detection3DRenderer] Marker prefab needs a MarkerController.");
+                    return;
+                }
+                _markerPool.Add(marker);
             }
 
             marker.UpdateMarker(markerWorldPos, markerRotation, markerScale, labelWithConfidence);
@@ -144,35 +142,22 @@ public class ObjectRenderer : MonoBehaviour
         {
             if (marker && marker.gameObject)
             {
-                Destroy(marker.gameObject);
+                marker.gameObject.SetActive(false);
             }
         }
         _activeMarkers.Clear();
     }
 
-    private Vector2 DetectionToViewport(float normalizedX, float normalizedY)
+    private void OnDisable() => ClearPreviousMarkers();
+
+    private void OnDestroy()
     {
-        var resolution = (Vector2)_cameraAccess.CurrentResolution;
-        if (resolution == Vector2.zero)
-        {
-            resolution = (Vector2)_cameraAccess.Intrinsics.SensorResolution;
-        }
-        if (resolution == Vector2.zero)
-        {
-            return new Vector2(Mathf.Clamp01(normalizedX), Mathf.Clamp01(1f - normalizedY));
-        }
-
-        var scaledX = Mathf.Clamp01(normalizedX) * ModelInputSize;
-        var scaledY = Mathf.Clamp01(normalizedY) * ModelInputSize;
-
-        var actualPixel = new Vector2(
-            scaledX * (resolution.x / ModelInputSize),
-            scaledY * (resolution.y / ModelInputSize));
-
-        return new Vector2(
-            Mathf.Clamp01(actualPixel.x / resolution.x),
-            Mathf.Clamp01(1f - actualPixel.y / resolution.y));
+        foreach (var marker in _markerPool)
+            if (marker) Destroy(marker.gameObject);
     }
+
+    private static Vector2 DetectionToViewport(float normalizedX, float normalizedY)
+        => new(Mathf.Clamp01(normalizedX), Mathf.Clamp01(1f - normalizedY));
 
     private static float GetConfidence(Unity.InferenceEngine.Tensor<float> coords, Unity.InferenceEngine.Tensor<float> confidenceTensor, int index)
     {

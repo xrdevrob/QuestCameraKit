@@ -28,7 +28,7 @@ If you’d like to see new functionality:
 
 When submitting a pull request:
 1. **Fork the Repository:** Create your branch off of the `main` branch.
-2. **Follow the Code Style:** Maintain clarity and consistency with the existing code. We put a lot of emphazise on making the samples simple and easy-to-understand, so other devs can build cool things quickly!
+2. **Follow the Code Style:** Maintain clarity and consistency with the existing code. We put a lot of emphasis on making the samples simple and easy-to-understand, so other devs can build cool things quickly!
 3. **Test Your Changes:** Ensure your modifications work on a supported Meta Quest device (Quest 3 or 3s with HorizonOS v74 or later) and in Unity (recommended Unity 6).
 4. **Write Clear Commit Messages:** Describe what you’re changing and why.
 5. **Link Related Issues:** Reference any issues or feature requests that your PR addresses.
@@ -42,3 +42,11 @@ To set up QuestCameraKit on your machine:
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/xrdevrob/QuestCameraKit.git
+   cd QuestCameraKit
+   git lfs pull
+   python3 scripts/check_repo.py
+   ```
+
+2. Open `Unity-QuestVisionKit` with the Unity version in `ProjectSettings/ProjectVersion.txt` and let Package Manager finish.
+3. Run the checks and the selected sample build described in [Testing](docs/testing.md).
+4. Keep credentials out of scenes and prefabs. Use a private development key only for local ImageLLM testing; production apps should call an authenticated backend.

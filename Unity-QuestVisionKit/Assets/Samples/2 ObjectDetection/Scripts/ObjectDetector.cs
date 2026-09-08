@@ -1,230 +1,137 @@
-using System.Collections;
-using UnityEngine;
-using Meta.XR;
 using System;
+using System.Collections;
+using Meta.XR;
+using Unity.InferenceEngine;
+using UnityEngine;
 
 public class ObjectDetector : MonoBehaviour
 {
-    [Header("Environment Sampling")]
-    [SerializeField] private Unity.InferenceEngine.ModelAsset sentisModel;
-    [SerializeField] private Unity.InferenceEngine.BackendType backend = Unity.InferenceEngine.BackendType.CPU;
-    [SerializeField] private float inferenceInterval = 0.1f;
-    [SerializeField] private int kLayersPerFrame = 20;
-    
-    private PassthroughCameraAccess _cameraAccess;
-    private Unity.InferenceEngine.Model _model;
-    private Unity.InferenceEngine.Worker _engine;
-    private ObjectRenderer _objectRenderer;
-    private Coroutine _inferenceCoroutine;
-    private Texture _cameraTexture;
-    private const int InputSize = 640;
+    [Header("Inference")]
+    [SerializeField] private ModelAsset sentisModel;
+    [SerializeField] private BackendType backend = BackendType.CPU;
+    [SerializeField, Min(0f)] private float inferenceInterval = 0.1f;
+    [SerializeField, Min(1)] private int kLayersPerFrame = 20;
 
-    private void Start()
+    private PassthroughCameraAccess _cameraAccess;
+    private ObjectRenderer _objectRenderer;
+    private Model _model;
+    private Worker _engine;
+    private Tensor<float> _input;
+    private Tensor<float> _coords;
+    private Tensor<int> _labels;
+    private Tensor<float> _confidences;
+    private const int InputSize = 640;
+    public int CompletedInferenceCount { get; private set; }
+
+    private void OnEnable()
     {
         _cameraAccess = GetComponent<PassthroughCameraAccess>();
         _objectRenderer = GetComponent<ObjectRenderer>();
-        
-        if (!_cameraAccess || !_objectRenderer)
+        if (!_cameraAccess || !_objectRenderer || !sentisModel)
         {
-            Debug.LogError("[ObjectDetector] PassthroughCameraAccess or Object Renderer not found in the scene.");
+            Debug.LogError("[ObjectDetector] Assign a model, PassthroughCameraAccess and ObjectRenderer.");
+            enabled = false;
             return;
         }
-        
-        LoadModel();
-        _inferenceCoroutine = StartCoroutine(InferenceLoop());
-    }
 
-    private void OnDestroy()
-    {
-        if (_inferenceCoroutine != null)
-        {
-            StopCoroutine(_inferenceCoroutine);
-            _inferenceCoroutine = null;
-        }
-        
-        _engine?.Dispose();
-    }
-
-    private void LoadModel()
-    {
         try
         {
-            _model = Unity.InferenceEngine.ModelLoader.Load(sentisModel);
-            _engine = new Unity.InferenceEngine.Worker(_model, backend);
+            _model = ModelLoader.Load(sentisModel);
+            if (_model.outputs.Count < 2)
+                throw new InvalidOperationException("Model needs coordinates and integer label outputs.");
+            _engine = new Worker(_model, backend);
+            _input = new Tensor<float>(new TensorShape(1, 3, InputSize, InputSize));
         }
         catch (Exception e)
         {
             Debug.LogError("[ObjectDetector] Failed to load model: " + e.Message);
+            enabled = false;
+            return;
         }
+
+        StartCoroutine(InferenceLoop());
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        ReleaseReadbacks();
+        _engine?.Dispose();
+        _engine = null;
+        _input?.Dispose();
+        _input = null;
+    }
+
+    private void ReleaseReadbacks()
+    {
+        _coords?.Dispose();
+        _labels?.Dispose();
+        _confidences?.Dispose();
+        _coords = null;
+        _labels = null;
+        _confidences = null;
     }
 
     private IEnumerator InferenceLoop()
     {
         while (isActiveAndEnabled)
         {
-            if (!TryEnsureCameraTexture())
-            {
-                yield return null;
-                continue;
-            }
-
-            yield return new WaitForSeconds(inferenceInterval);
-
-            yield return StartCoroutine(PerformInference(_cameraTexture));
+            yield return new WaitForSeconds(Mathf.Max(0f, inferenceInterval));
+            if (!_cameraAccess || !_cameraAccess.IsPlaying) continue;
+            // Camera textures can be replaced after a pause or resolution change.
+            var texture = _cameraAccess.GetTexture();
+            if (!texture) continue;
+            yield return PerformInference(texture, _cameraAccess.GetCameraPose());
         }
     }
 
-    private IEnumerator PerformInference(Texture texture)
+    private IEnumerator PerformInference(Texture texture, Pose capturePose)
     {
-        var tensorShape = new Unity.InferenceEngine.TensorShape(1, 3, InputSize, InputSize);
-        var inputTensor = new Unity.InferenceEngine.Tensor<float>(tensorShape);
-        Unity.InferenceEngine.TextureConverter.ToTensor(texture, inputTensor);
-
-        var schedule = _engine.ScheduleIterable(inputTensor);
+        TextureConverter.ToTensor(texture, _input);
+        var schedule = _engine.ScheduleIterable(_input);
         if (schedule == null)
         {
-            Debug.LogWarning("[ObjectDetector] ScheduleIterable returned null; falling back to synchronous scheduling.");
-            _engine.Schedule(inputTensor);
+            _engine.Schedule(_input);
         }
         else
         {
-            var it = 0;
+            var layers = 0;
             while (schedule.MoveNext())
             {
-                if (++it % kLayersPerFrame == 0)
-                    yield return null;
+                if (++layers % Mathf.Max(1, kLayersPerFrame) == 0) yield return null;
             }
         }
 
-        Unity.InferenceEngine.Tensor<float> coordsOutput = null;
-        Unity.InferenceEngine.Tensor<int> labelIDsOutput = null;
-        Unity.InferenceEngine.Tensor<float> confidenceOutput = null;
-        Unity.InferenceEngine.Tensor<float> pullCoords = _engine.PeekOutput(0) as Unity.InferenceEngine.Tensor<float>;
-        Unity.InferenceEngine.Tensor<int> pullLabelIDs = _engine.PeekOutput(1) as Unity.InferenceEngine.Tensor<int>;
-        Unity.InferenceEngine.Tensor<float> pullConfidences = TryPeekConfidenceOutput();
-
-        var isWaiting = false;
-        var downloadState = 0;
-        
-        while (true)
+        var coords = _engine.PeekOutput(0) as Tensor<float>;
+        var labels = _engine.PeekOutput(1) as Tensor<int>;
+        var confidences = _model.outputs.Count > 2 ? _engine.PeekOutput(2) as Tensor<float> : null;
+        if (coords?.dataOnBackend == null || labels?.dataOnBackend == null)
         {
-            switch (downloadState)
-            {
-                case 0:
-                    if (pullCoords?.dataOnBackend == null)
-                    {
-                        Debug.LogError("[ObjectDetector] Coordinates output is null or missing backend data.");
-                        inputTensor.Dispose();
-                        yield break;
-                    }
-                    if (!isWaiting)
-                    {
-                        pullCoords.ReadbackRequest();
-                        isWaiting = true;
-                    }
-                    else if (pullCoords.IsReadbackRequestDone())
-                    {
-                        coordsOutput = pullCoords.ReadbackAndClone();
-                        isWaiting = false;
-                        downloadState = 1;
-                    }
-                    break;
-                case 1:
-                    if (pullLabelIDs?.dataOnBackend == null)
-                    {
-                        Debug.LogError("[ObjectDetector] LabelIDs output is null or missing backend data.");
-                        inputTensor.Dispose();
-                        coordsOutput?.Dispose();
-                        yield break;
-                    }
-                    if (!isWaiting)
-                    {
-                        pullLabelIDs.ReadbackRequest();
-                        isWaiting = true;
-                    }
-                    else if (pullLabelIDs.IsReadbackRequestDone())
-                    {
-                        labelIDsOutput = pullLabelIDs.ReadbackAndClone();
-                        isWaiting = false;
-                        downloadState = pullConfidences != null ? 2 : 3;
-                    }
-                    break;
-                case 2:
-                    if (pullConfidences?.dataOnBackend == null)
-                    {
-                        pullConfidences = null;
-                        downloadState = 3;
-                        break;
-                    }
-                    if (!isWaiting)
-                    {
-                        pullConfidences.ReadbackRequest();
-                        isWaiting = true;
-                    }
-                    else if (pullConfidences.IsReadbackRequestDone())
-                    {
-                        confidenceOutput = pullConfidences.ReadbackAndClone();
-                        isWaiting = false;
-                        downloadState = 3;
-                    }
-                    break;
-                case 3:
-                    if (_objectRenderer)
-                    {
-                        _objectRenderer.RenderDetections(
-                            coordsOutput, 
-                            labelIDsOutput,
-                            confidenceOutput
-                        );
-                    }
-                    downloadState = 4;
-                    break;
-                case 4:
-                    inputTensor.Dispose();
-                    coordsOutput?.Dispose();
-                    labelIDsOutput?.Dispose();
-                    confidenceOutput?.Dispose();
-                    yield break;
-            }
+            Debug.LogError("[ObjectDetector] Model must output float coordinates and integer label IDs.");
+            enabled = false;
+            yield break;
+        }
+
+        coords.ReadbackRequest();
+        labels.ReadbackRequest();
+        confidences?.ReadbackRequest();
+        while (!coords.IsReadbackRequestDone() || !labels.IsReadbackRequestDone() ||
+               (confidences != null && !confidences.IsReadbackRequestDone()))
+        {
             yield return null;
         }
-    }
 
-    private bool TryEnsureCameraTexture()
-    {
-        if (!_cameraAccess || !_cameraAccess.IsPlaying)
-        {
-            return false;
-        }
-
-        if (_cameraTexture)
-        {
-            return true;
-        }
-
-        _cameraTexture = _cameraAccess.GetTexture();
-        if (_cameraTexture)
-        {
-            var resolution = _cameraAccess.CurrentResolution;
-            print($"[ObjectDetector] Passthrough texture ready: {resolution.x}x{resolution.y}");
-        }
-        else
-        {
-            Debug.LogWarning("[ObjectDetector] Passthrough texture not available yet.");
-        }
-
-        return _cameraTexture;
-    }
-
-    private Unity.InferenceEngine.Tensor<float> TryPeekConfidenceOutput()
-    {
         try
         {
-            return _engine.PeekOutput(2) as Unity.InferenceEngine.Tensor<float>;
+            _coords = coords.ReadbackAndClone();
+            _labels = labels.ReadbackAndClone();
+            _confidences = confidences?.ReadbackAndClone();
+            if (_objectRenderer) _objectRenderer.RenderDetections(_coords, _labels, _confidences, capturePose);
+            CompletedInferenceCount++;
         }
-        catch (Exception)
+        finally
         {
-            return null;
+            ReleaseReadbacks();
         }
     }
 }

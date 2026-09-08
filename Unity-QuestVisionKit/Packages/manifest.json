@@ -1,17 +1,17 @@
 {
   "dependencies": {
-    "com.meta.xr.mrutilitykit": "83.0.4",
-    "com.meta.xr.sdk.core": "83.0.4",
-    "com.unity.ai.inference": "2.3.0",
-    "com.unity.ide.rider": "3.0.38",
-    "com.unity.ide.visualstudio": "2.0.23",
-    "com.unity.inputsystem": "1.14.2",
-    "com.unity.mobile.android-logcat": "1.4.6",
-    "com.unity.render-pipelines.universal": "17.2.0",
+    "com.meta.xr.mrutilitykit": "205.0.0",
+    "com.meta.xr.sdk.core": "205.0.0",
+    "com.unity.ai.inference": "2.6.1",
+    "com.unity.ide.rider": "3.1.0",
+    "com.unity.ide.visualstudio": "2.0.28",
+    "com.unity.inputsystem": "1.20.0",
+    "com.unity.mobile.android-logcat": "1.4.7",
+    "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.ugui": "2.0.0",
-    "com.unity.xr.management": "4.5.1",
-    "com.unity.xr.meta-openxr": "2.2.1",
-    "com.unity.xr.openxr": "1.15.1",
+    "com.unity.xr.management": "4.7.0",
+    "com.unity.xr.meta-openxr": "2.6.1",
+    "com.unity.xr.openxr": "1.18.0",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
@@ -43,6 +43,10 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0"
+    "com.unity.modules.xr": "1.0.0",
+    "com.xrdevrob.quak": "file:com.xrdevrob.quak-0.4.0-alpha.1.tgz",
+    "com.unity.webrtc": "3.0.0",
+    "com.firedragongamestudio.simplewebrtc": "https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC#d3fc983d0c91c150a41f42e6ceb5124baaba5891",
+    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#ea014c9ae534d56111962d96f89f8a046e302dc9"
   }
 }

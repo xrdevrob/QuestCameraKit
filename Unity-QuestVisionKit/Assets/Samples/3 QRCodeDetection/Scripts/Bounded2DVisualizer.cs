@@ -38,53 +38,32 @@ namespace Meta.XR.MRUtilityKitSamples.QRCodeDetection
 
         MRUKTrackable _trackable;
 
-        Rect _box;
-
         public void Initialize(MRUKTrackable trackable)
         {
             _trackable = trackable;
-
-            if (trackable.PlaneBoundary2D == null && trackable.PlaneRect == null)
-            {
-                Debug.LogWarning($"{trackable} is missing a plane component.");
-            }
-            else
-            {
-                UpdateBoundingBox();
-            }
+            Update();
         }
 
-        void Update()
+        void Update() => SetBounds(_trackable ? _trackable.PlaneRect : null);
+
+        internal void SetBounds(Rect? bounds)
         {
-            if (!_trackable)
-            {
-                return;
-            }
+            var visible = bounds.HasValue;
+            if (_lineRenderer) _lineRenderer.enabled = visible;
+            if (_canvasRect) _canvasRect.gameObject.SetActive(visible);
+            if (!visible || !_lineRenderer) return;
 
-            UnityEngine.Assertions.Assert.IsTrue(_trackable.PlaneRect.HasValue);
-            _box = _trackable.PlaneRect.Value;
-
-            UpdateBoundingBox();
-
-            if (!_canvasRect)
-            {
-                return;
-            }
-
-            _canvasRect.localPosition = new Vector3(
-                x: _box.center.x + _canvasOffset.x * _canvasRect.localScale.x,
-                y: _box.yMin + _canvasOffset.y * _canvasRect.localScale.y,
-                z: _canvasOffset.z * _canvasRect.localScale.z
-            );
-        }
-
-        void UpdateBoundingBox()
-        {
+            var box = bounds.Value;
             _lineRenderer.positionCount = 4;
-            _lineRenderer.SetPosition(0, new Vector3(_box.x, _box.y, 0));
-            _lineRenderer.SetPosition(1, new Vector3(_box.x + _box.width, _box.y, 0));
-            _lineRenderer.SetPosition(2, new Vector3(_box.x + _box.width, _box.y + _box.height, 0));
-            _lineRenderer.SetPosition(3, new Vector3(_box.x, _box.y + _box.height, 0));
+            _lineRenderer.SetPosition(0, new Vector3(box.xMin, box.yMin, 0));
+            _lineRenderer.SetPosition(1, new Vector3(box.xMax, box.yMin, 0));
+            _lineRenderer.SetPosition(2, new Vector3(box.xMax, box.yMax, 0));
+            _lineRenderer.SetPosition(3, new Vector3(box.xMin, box.yMax, 0));
+            if (!_canvasRect) return;
+            _canvasRect.localPosition = new Vector3(
+                box.center.x + _canvasOffset.x * _canvasRect.localScale.x,
+                box.yMin + _canvasOffset.y * _canvasRect.localScale.y,
+                _canvasOffset.z * _canvasRect.localScale.z);
         }
     }
 }

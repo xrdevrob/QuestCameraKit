@@ -43,6 +43,7 @@ namespace Meta.XR.MRUtilityKitSamples.QRCodeDetection
 
         public void Initialize(MRUKTrackable trackable)
         {
+            _text.richText = false;
             if (trackable.MarkerPayloadString is { } str)
             {
                 _text.text = $"\"{str}\"";

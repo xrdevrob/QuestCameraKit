@@ -43,7 +43,7 @@ public static class WebRTCDefineSymbolChecker {
                 }
 
                 var newDefines = string.Join(";", defineList);
-                PlayerSettings.SetScriptingDefineSymbols(target, newDefines);
+                if (newDefines != defines) PlayerSettings.SetScriptingDefineSymbols(target, newDefines);
             } catch (System.Exception ex) {
                 Debug.LogWarning($"[WebRTCDefineSymbolChecker] Could not update define for target {target}: {ex.Message}");
             }
@@ -51,8 +51,8 @@ public static class WebRTCDefineSymbolChecker {
     }
 
     private static bool HasWebRTCPackage() {
-        var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages();
-        return packages.Where(p => p.name.Equals("com.unity.webrtc")).Any();
+        return System.AppDomain.CurrentDomain.GetAssemblies()
+            .Any(assembly => assembly.GetType("SimpleWebRTC.WebRTCConnection", false) != null);
     }
 }
 #endif

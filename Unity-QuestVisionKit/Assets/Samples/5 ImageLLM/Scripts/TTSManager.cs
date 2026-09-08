@@ -14,17 +14,17 @@ namespace QuestCameraKit.OpenAI
         private void Awake()
         {
             _imageOpenAIConnector = FindAnyObjectByType<ImageOpenAIConnector>();
-            audioPlayer = GetComponentInChildren<AudioPlayer>();
+            if (!audioPlayer) audioPlayer = GetComponentInChildren<AudioPlayer>();
         }
 
         public void SynthesizeAndPlay(string text)
         {
-            Debug.Log("Trying to synthesize " + text);
+            if (!_imageOpenAIConnector || !audioPlayer || string.IsNullOrWhiteSpace(text)) return;
             _imageOpenAIConnector.StartCoroutine(_imageOpenAIConnector.RequestTextToSpeech(
                 text,
                 audioData =>
                 {
-                    if (audioData == null)
+                    if (audioData == null || !this || !audioPlayer)
                     {
                         return;
                     }
