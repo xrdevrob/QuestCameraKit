@@ -8,25 +8,25 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Samples/1 ColorPicker/ColorPicker.unity
     guid: 4297271dc2b40744bb71161efead075b
-  - enabled: 0
+  - enabled: 1
     path: Assets/Samples/2 ObjectDetection/ObjectDetection.unity
     guid: 59f22156e8aa44aeead8e1331b47c7aa
-  - enabled: 0
+  - enabled: 1
     path: Assets/Samples/3 QRCodeTracking/QRCodeTracking.unity
     guid: 987cb8b6148ad48e2882cf1a7a847068
-  - enabled: 0
+  - enabled: 1
     path: Assets/Samples/4 Shaders/CameraMappingForShaders.unity
     guid: fc38ce993dd1495bb87751c2ec56a145
-  - enabled: 0
+  - enabled: 1
     path: Assets/Samples/5 ImageLLM/ImageLLM.unity
     guid: e315df11792f04348a6913e0c2feac5f
-  - enabled: 0
+  - enabled: 1
     path: Assets/Samples/6 WebRTC/WebRTC-Quest.unity
     guid: 4dc6138ac6e3c6348bba19965ecddf4d
   - enabled: 0
     path: Assets/Samples/6 WebRTC/WebRTC-SingleClient.unity
     guid: 391160c7b8e603c4e82dd04b0c807c3e
-  - enabled: 0
+  - enabled: 1
     path: Assets/Samples/7 QRCodeDetection/QRCodeDetection.unity
     guid: 8b94352aa29d6894d8e73966f3ee47d0
   m_configObjects:

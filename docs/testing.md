@@ -27,7 +27,7 @@ Run `QuestCameraKit.Editor.MaintenanceChecks.AuditScenes` the same way to inspec
 
 ## Build one real sample for Quest
 
-The regular **Build and Run** scene list starts with ColorPicker. The CLI helper builds one existing sample as a separate ARM64 IL2CPP development APK and enables Quak's direct OpenXR bridge:
+The regular **Build and Run** scene list includes all seven headset samples, starting with ColorPicker and its sample menu. Y opens/closes the menu, left thumbstick selects, and X loads a scene. The desktop receiving peer is excluded. The CLI helper defaults to `AllSamples` for a combined APK; pass a specific scene name to retain the individual-sample ARM64 IL2CPP development APK and enables Quak's direct OpenXR bridge:
 
 ```sh
 Unity -batchmode -nographics -quit \
@@ -39,7 +39,7 @@ Unity -batchmode -nographics -quit \
   -logFile /absolute/path/build.log
 ```
 
-Use `ObjectDetection`, `QRCodeTracking`, `CameraMappingForShaders`, `ImageLLM`, `QRCodeDetection`, or `WebRTC-Quest` for the other headset samples. `WebRTC-SingleClient` is the receiving-peer scene. Development package IDs are `com.xrdevrob.questcamerakit.<lowercase-scene-name-without-hyphens>`; the helper restores the project's original application ID and product name afterward. Development diagnostics observe the real scene; they do not navigate, synthesize detections, or perform sample interactions. They are excluded from release players.
+Use `AllSamples` for the combined menu app, or `ObjectDetection`, `QRCodeTracking`, `CameraMappingForShaders`, `ImageLLM`, `QRCodeDetection`, or `WebRTC-Quest` for the other headset samples. `WebRTC-SingleClient` is the receiving-peer scene. Development package IDs are `com.xrdevrob.questcamerakit.<lowercase-scene-name-without-hyphens>`; the helper restores the project's original application ID and product name afterward. Development diagnostics observe the real scene; they do not navigate, synthesize detections, or perform sample interactions. They are excluded from release players.
 
 For a **non-development release build**, disable `XR_APILAYER_XRDEVROB_quak_injection` in Android's OpenXR API Layers settings first. Quak deliberately rejects release builds with its injection layer enabled. The command above is explicitly a device-test build, not a store-release pipeline.
 

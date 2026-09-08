@@ -15,10 +15,12 @@ namespace QuestCameraKit.Editor
         public static void Build()
         {
             var args = Environment.GetCommandLineArgs();
-            var sceneName = Argument(args, "-sampleScene", "ColorPicker");
+            var sceneName = Argument(args, "-sampleScene", "AllSamples");
             var paths = AssetDatabase.FindAssets("t:Scene", new[] { "Assets/Samples" })
-                .Select(AssetDatabase.GUIDToAssetPath).Where(p => Path.GetFileNameWithoutExtension(p) == sceneName).ToArray();
-            if (paths.Length != 1) throw new ArgumentException($"Expected exactly one sample scene named {sceneName}.");
+                .Select(AssetDatabase.GUIDToAssetPath).Where(p => sceneName == "AllSamples"
+                    ? Path.GetFileNameWithoutExtension(p) != "WebRTC-SingleClient"
+                    : Path.GetFileNameWithoutExtension(p) == sceneName).OrderBy(p => p).ToArray();
+            if (paths.Length == 0 || (sceneName != "AllSamples" && paths.Length != 1)) throw new ArgumentException($"Expected exactly one sample scene named {sceneName}.");
             var apk = Path.GetFullPath(Argument(args, "-apk", Path.Combine(Application.dataPath, "../../Builds", sceneName + ".apk")));
             Directory.CreateDirectory(Path.GetDirectoryName(apk));
             XRDevRob.QUAK.Editor.ControlPanel.QuakProjectSetup.ConfigureProject();

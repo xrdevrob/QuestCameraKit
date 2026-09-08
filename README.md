@@ -14,6 +14,12 @@ QuestCameraKit is a collection of template and reference projects demonstrating 
 - [License](#license)
 - [Contact](#contact)
 
+# Running all samples
+
+Build and Run now includes all seven headset samples in one app. Press **Y** to open or close the menu, move the **left thumbstick** to choose, and press **X** to load a sample. In the Editor use **M**, **↑/↓**, and **Enter**. This menu currently uses Touch controllers; the samples retain their existing hand interactions. The desktop WebRTC receiver remains a separate scene.
+
+For QR tracking without an extra decoder, start with **QR tracking (Meta native)**, sample 7. It uses the MRUK package already required by this project. Sample 3 demonstrates raw camera decoding using the bundled ZXing library; no manual NuGet installation is needed. Native tracking still depends on headset runtime support and spatial-data permission.
+
 # PCA Samples
 
 ## 1. 🎨 Color Picker

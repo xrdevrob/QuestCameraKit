@@ -20,8 +20,15 @@ namespace QuestCameraKit.Diagnostics
         private int _errors;
         public string ProviderId => "quest-camera-kit";
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void Install() => new GameObject("QuestCameraKit diagnostics").AddComponent<CameraKitState>();
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Install()
+        {
+            SceneManager.sceneLoaded -= ObserveScene;
+            SceneManager.sceneLoaded += ObserveScene;
+        }
+
+        private static void ObserveScene(Scene scene, LoadSceneMode mode) =>
+            new GameObject("QuestCameraKit diagnostics").AddComponent<CameraKitState>();
 
         private void Awake()
         {

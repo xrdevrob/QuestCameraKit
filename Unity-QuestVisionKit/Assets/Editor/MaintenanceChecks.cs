@@ -39,6 +39,9 @@ namespace QuestCameraKit.Editor
         {
             Require(typeof(QuestCameraKit.WebRTC.WebRTCController).GetField("_webRTCConnection",
                 BindingFlags.NonPublic | BindingFlags.Instance) != null, "WEBRTC_ENABLED must compile the streaming controller.");
+            Require(SampleMenu.Label("Assets/Samples/7 QRCodeDetection/QRCodeDetection.unity") == "QR tracking (Meta native)",
+                "Native QR must be clearly distinguished from the raw-camera sample.");
+            Require(SampleMenu.AvailableScenes().Length == 7 && !SampleMenu.AvailableScenes().Any(path => path.Contains("WebRTC-SingleClient")), "The combined build must contain all seven headset samples.");
             CheckWavStereo();
             CheckModelContract();
             var escape = typeof(ImageOpenAIConnector).GetMethod("EscapeJson", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -109,6 +112,36 @@ namespace QuestCameraKit.Editor
             Require(coords.shape.rank == 2 && coords.shape[1] >= 4, "Model coordinate shape changed.");
             Require(coords.shape[0] == labels.shape.length, "Detection and label counts disagree.");
             Debug.Log("PASS: bundled model executes on CPU and preserves the output contract (synthetic black input).");
+        }
+
+        public static void PreviewMenu()
+        {
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var camera = new GameObject("Preview camera", typeof(Camera)).GetComponent<Camera>();
+            camera.tag = "MainCamera";
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.12f, 0.15f, 0.19f);
+            var menu = new GameObject("Menu preview").AddComponent<SampleMenu>();
+            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            typeof(SampleMenu).GetMethod("Awake", flags).Invoke(menu, null);
+            typeof(SampleMenu).GetMethod("Refresh", flags).Invoke(menu, null);
+            typeof(SampleMenu).GetMethod("LateUpdate", flags).Invoke(menu, null);
+            Canvas.ForceUpdateCanvases();
+            var target = new RenderTexture(1200, 1000, 24);
+            camera.targetTexture = target;
+            camera.Render();
+            var previous = RenderTexture.active;
+            RenderTexture.active = target;
+            var image = new Texture2D(1200, 1000, TextureFormat.RGB24, false);
+            image.ReadPixels(new Rect(0, 0, 1200, 1000), 0, 0);
+            image.Apply();
+            File.WriteAllBytes(Path.GetFullPath(Path.Combine(Application.dataPath, "../../menu-preview.png")), image.EncodeToPNG());
+            RenderTexture.active = previous;
+            camera.targetTexture = null;
+            Object.DestroyImmediate(image);
+            Object.DestroyImmediate(target);
+            Object.DestroyImmediate(menu.gameObject);
+            Object.DestroyImmediate(camera.gameObject);
         }
 
         public static void AuditScenes()
