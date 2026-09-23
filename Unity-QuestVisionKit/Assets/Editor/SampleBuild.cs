@@ -23,7 +23,6 @@ namespace QuestCameraKit.Editor
             if (paths.Length == 0 || (sceneName != "AllSamples" && paths.Length != 1)) throw new ArgumentException($"Expected exactly one sample scene named {sceneName}.");
             var apk = Path.GetFullPath(Argument(args, "-apk", Path.Combine(Application.dataPath, "../../Builds", sceneName + ".apk")));
             Directory.CreateDirectory(Path.GetDirectoryName(apk));
-            XRDevRob.QUAK.Editor.ControlPanel.QuakProjectSetup.ConfigureProject();
             var originalId = PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android);
             var originalName = PlayerSettings.productName;
             try

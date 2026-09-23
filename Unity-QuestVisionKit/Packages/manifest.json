@@ -44,7 +44,6 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0",
-    "com.xrdevrob.quak": "file:com.xrdevrob.quak-0.4.0-alpha.1.tgz",
     "com.unity.webrtc": "3.0.0",
     "com.firedragongamestudio.simplewebrtc": "https://github.com/FireDragonGameStudio/SimpleWebRTC.git?path=/Assets/SimpleWebRTC#d3fc983d0c91c150a41f42e6ceb5124baaba5891",
     "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#ea014c9ae534d56111962d96f89f8a046e302dc9"

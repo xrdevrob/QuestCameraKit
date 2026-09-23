@@ -31,7 +31,7 @@ git lfs pull
 1. Open **`Unity-QuestVisionKit`** in Unity Hub with the editor version above.
 2. Let Package Manager finish importing the pinned dependencies. QR tracking uses the included Meta MRUK package; WebRTC dependencies resolve automatically.
 3. Select **Android** in Build Profiles and connect your headset.
-4. Enable **Development Build** for the included Quak test setup, then choose **Build and Run**. See [release-build settings](docs/testing.md#build-one-real-sample-for-quest) before making a non-development build.
+4. Choose **Build and Run**.
 5. Keep the headset awake, accept the relevant camera/spatial-data permissions, and choose a sample from the menu.
 
 The build includes **all six headset samples**, starting with ColorPicker. The desktop WebRTC receiver is separate.
@@ -122,13 +122,12 @@ The project pins its dependencies in [`manifest.json`](Unity-QuestVisionKit/Pack
 | OpenXR / Meta OpenXR | 1.18.0 / 2.6.1 |
 | Universal Render Pipeline | 17.3.0 |
 | Unity WebRTC | 3.0.0 |
-| Quak device testing | 0.4.0-alpha.1 |
 
 SimpleWebRTC and NativeWebSocket are pinned to Git revisions. See [third-party dependencies](docs/third-party.md) for provenance and licensing.
 
 ## Builds and testing
 
-[The testing guide](docs/testing.md) covers individual and combined APK builds, Unity regression checks, scene audits, and the included **Quak** device tests. Quak is the renamed XRQA project.
+[The testing guide](docs/testing.md) covers individual and combined APK builds, Unity regression checks, and scene audits.
 
 For a quick repository check:
 
@@ -150,7 +149,6 @@ The September 2026 maintenance pass built the combined app and all six individua
 | Assets are missing after cloning | Run `git lfs pull`, then the repository check above. |
 | ImageLLM does not respond | Check the private API key, model access, microphone permission, and network connection. |
 | WebRTC does not connect | Configure both peers, enable their signaling connections, and confirm the server is reachable. |
-| Non-development build rejects Quak | Disable its OpenXR injection layer as described in the [testing guide](docs/testing.md). |
 
 ## Community
 

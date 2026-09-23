@@ -137,7 +137,3 @@ Assets/Resources/PerformanceTestRunInfo.json*
 Assets/Resources/PerformanceTestRunSettings.json*
 Assets/XR/Temp/
 Assets/XR/Temp.meta
-.quak/evidence/
-.quak/machines.local.json
-.quak/packages/
-.quak/venv/

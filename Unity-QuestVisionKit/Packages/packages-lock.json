@@ -363,18 +363,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "com.xrdevrob.quak": {
-      "version": "file:com.xrdevrob.quak-0.4.0-alpha.1.tgz",
-      "depth": 0,
-      "source": "local-tarball",
-      "dependencies": {
-        "com.unity.inputsystem": "1.19.0",
-        "com.unity.modules.audio": "1.0.0",
-        "com.unity.xr.openxr": "1.17.1",
-        "com.unity.xr.management": "4.5.4",
-        "com.unity.ugui": "2.0.0"
-      }
-    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,

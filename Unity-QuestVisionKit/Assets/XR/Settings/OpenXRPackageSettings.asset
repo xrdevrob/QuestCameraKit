@@ -362,29 +362,6 @@ MonoBehaviour:
   targetOpenXRApiVersion:
   required: 0
   customRuntimeLoaderName:
---- !u!114 &-7090151466276671336
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4f7049b82bd4c5bb751195883f5a421, type: 3}
-  m_Name: QuakObservabilityFeature Android
-  m_EditorClassIdentifier: XRDevRob.QUAK.Direct::XRDevRob.QUAK.Direct.QuakObservabilityFeature
-  m_enabled: 1
-  nameUi: QUAK Runtime Observability
-  version: 0.3.1
-  featureIdInternal: com.xrdevrob.quak.observability
-  openxrExtensionStrings: XR_META_performance_metrics XR_FB_display_refresh_rate
-    XR_FB_passthrough XR_META_passthrough_layer_resumed_event
-  company: XR Dev Rob
-  priority: 0
-  targetOpenXRApiVersion:
-  required: 0
-  customRuntimeLoaderName:
 --- !u!114 &-6979939743321133505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1269,28 +1246,6 @@ MonoBehaviour:
   targetOpenXRApiVersion:
   required: 0
   customRuntimeLoaderName:
---- !u!114 &-1404192864482536734
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 902a2253d8b44355ab6bd99b6a723657, type: 3}
-  m_Name: QuakSimultaneousInputFeature Android
-  m_EditorClassIdentifier: XRDevRob.QUAK.Direct::XRDevRob.QUAK.Direct.QuakSimultaneousInputFeature
-  m_enabled: 0
-  nameUi: QUAK Simultaneous Hands and Controllers
-  version: 0.3.1
-  featureIdInternal: com.xrdevrob.quak.simultaneous-input
-  openxrExtensionStrings: XR_META_simultaneous_hands_and_controllers
-  company: XR Dev Rob
-  priority: 0
-  targetOpenXRApiVersion:
-  required: 0
-  customRuntimeLoaderName:
 --- !u!114 &-1286049194203868381
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1422,28 +1377,6 @@ MonoBehaviour:
   featureIdInternal: com.unity.openxr.feature.arfoundation-meta-raycast
   openxrExtensionStrings: XR_EXT_future XR_META_environment_raycast
   company: Unity Technologies
-  priority: 0
-  targetOpenXRApiVersion:
-  required: 0
-  customRuntimeLoaderName:
---- !u!114 &-143030434218049668
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71063a1b14d143f6990812f86e57c826, type: 3}
-  m_Name: QuakOperatorFeature Standalone
-  m_EditorClassIdentifier: XRDevRob.QUAK.MetaOperator::XRDevRob.QUAK.MetaOperator.QuakOperatorFeature
-  m_enabled: 0
-  nameUi: QUAK Meta XR Operator Bridge
-  version: 0.3.1
-  featureIdInternal: com.xrdevrob.quak.operator-bridge
-  openxrExtensionStrings: XR_METAX1_agentic_external_tool
-  company: XR Dev Rob
   priority: 0
   targetOpenXRApiVersion:
   required: 0
@@ -1831,28 +1764,6 @@ MonoBehaviour:
   targetOpenXRApiVersion:
   required: 0
   customRuntimeLoaderName:
---- !u!114 &1870022304357730501
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71063a1b14d143f6990812f86e57c826, type: 3}
-  m_Name: QuakOperatorFeature Android
-  m_EditorClassIdentifier: XRDevRob.QUAK.MetaOperator::XRDevRob.QUAK.MetaOperator.QuakOperatorFeature
-  m_enabled: 0
-  nameUi: QUAK Meta XR Operator Bridge
-  version: 0.3.1
-  featureIdInternal: com.xrdevrob.quak.operator-bridge
-  openxrExtensionStrings: XR_METAX1_agentic_external_tool
-  company: XR Dev Rob
-  priority: 0
-  targetOpenXRApiVersion:
-  required: 0
-  customRuntimeLoaderName:
 --- !u!114 &1956089420635840536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1876,16 +1787,7 @@ MonoBehaviour:
   required: 0
   customRuntimeLoaderName:
   m_ApiLayers:
-    m_Collection:
-    - m_Json:
-        name: XR_APILAYER_XRDEVROB_quak_injection
-        library_path: libXrApiLayer_QUAK_injection.so
-        api_version: 1.1
-        implementation_version: 1
-        description: QUAK controller injection layer for development testing
-      m_JsonFileName: XrApiLayer_QUAK_injection.json
-      m_LibraryArchitecture: 3
-      m_IsEnabled: 1
+    m_Collection: []
 --- !u!114 &2117131132967209344
 MonoBehaviour:
   m_ObjectHideFlags: 0
